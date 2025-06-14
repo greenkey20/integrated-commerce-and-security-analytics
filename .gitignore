@@ -1,0 +1,23 @@
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Python specific
+.Python/
+
+# macOS
+.DS_Store
+
+# Streamlit
+.streamlit/
+
+# User-specific
+draft/
