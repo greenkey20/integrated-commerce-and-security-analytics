@@ -7,6 +7,7 @@
 - **데이터 개요**: 업로드된 고객 데이터의 기본 정보 및 통계 요약 제공
 - **탐색적 데이터 분석 (EDA)**: 고객 속성(성별, 연령, 소득, 지출 점수) 분포 및 상관관계 시각화
 - **클러스터링 분석**:
+    - 주성분 분석 (PCA)을 통한 데이터 시각화 및 차원 축소 옵션 제공
     - 엘보우 방법(Elbow Method) 및 실루엣 점수(Silhouette Score)를 이용한 최적 클러스터 개수 제안
     - K-means 클러스터링 수행 및 결과 시각화 (3D, 2D 산점도, 상세 클러스터 맵)
     - 동적으로 생성된 클러스터별 특성(평균 소득, 지출, 연령 등) 및 라벨 제공
@@ -56,7 +57,7 @@
 -   **언어**: Python
 -   **웹 프레임워크**: Streamlit
 -   **데이터 분석**: Pandas, NumPy
--   **머신러닝**: Scikit-learn (KMeans, StandardScaler, silhouette_score)
+-   **머신러닝**: Scikit-learn (KMeans, StandardScaler, PCA, silhouette_score)
 -   **시각화**: Matplotlib, Seaborn, Plotly Express, Plotly Graph Objects
 
 ## 🔮 향후 개선 사항
