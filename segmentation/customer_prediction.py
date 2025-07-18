@@ -7,8 +7,8 @@
 import streamlit as st
 import pandas as pd
 import numpy as np
-from core.data_processing import DataProcessor
-from core.clustering import ClusterAnalyzer
+from segmentation.data_processing import DataProcessor
+from segmentation.clustering import ClusterAnalyzer
 
 
 def show_customer_prediction_page():

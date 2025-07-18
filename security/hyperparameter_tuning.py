@@ -13,8 +13,8 @@ from sklearn.metrics import classification_report, confusion_matrix
 import json
 from datetime import datetime
 
-from core.anomaly_detection import APILogAnomalyDetector
-from data.cicids_data_loader import CICIDSDataLoader
+from security.anomaly_detector import APILogAnomalyDetector
+from security.data_loader import CICIDSDataLoader
 
 
 class SecurityHyperparameterTuner:

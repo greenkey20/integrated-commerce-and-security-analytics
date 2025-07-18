@@ -13,12 +13,12 @@ import numpy as np
 import warnings
 
 # 리팩토링된 페이지 모듈들 import
-from .retail_data_loading import show_data_loading_page, get_data_loading_status
-from .retail_data_cleaning import show_data_cleaning_page, get_data_cleaning_status
-from .retail_feature_engineering import show_feature_engineering_page, get_feature_engineering_status
-from .retail_target_creation import show_target_creation_page, get_target_creation_status
-from .retail_modeling import show_modeling_page, get_modeling_status
-from .retail_evaluation import show_evaluation_page, get_evaluation_status
+from src.pages.retail.data_loading import show_data_loading_page, get_data_loading_status
+from src.pages.retail.data_cleaning import show_data_cleaning_page, get_data_cleaning_status
+from src.pages.retail.feature_engineering import show_feature_engineering_page, get_feature_engineering_status
+from src.pages.retail.target_creation import show_target_creation_page, get_target_creation_status
+from src.pages.retail.modeling import show_modeling_page, get_modeling_status
+from src.pages.retail.evaluation import show_evaluation_page, get_evaluation_status
 
 warnings.filterwarnings("ignore")
 

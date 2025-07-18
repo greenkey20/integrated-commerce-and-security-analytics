@@ -11,7 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from core.retail_data_processor import RetailDataProcessor
+from retail_analysis.data_processor import RetailDataProcessor
 import warnings
 
 warnings.filterwarnings("ignore")

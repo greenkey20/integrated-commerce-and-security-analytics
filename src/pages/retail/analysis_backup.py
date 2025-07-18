@@ -17,7 +17,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from core.retail_analysis import RetailDataProcessor, RetailVisualizer
+from retail_analysis.analysis import RetailDataProcessor, RetailVisualizer
 from sklearn.model_selection import train_test_split
 from sklearn.linear_model import LinearRegression
 from sklearn.preprocessing import StandardScaler

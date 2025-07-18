@@ -20,7 +20,7 @@ import hashlib
 import time
 
 # 기존 프로젝트 모듈 import (가정)
-from core.anomaly_detection import APILogAnomalyDetector, RealTimeAnomalyMonitor
+from security.anomaly_detector import APILogAnomalyDetector, RealTimeAnomalyMonitor
 
 app = FastAPI(title="Customer Segmentation API", version="1.0.0")
 

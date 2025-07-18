@@ -4,6 +4,10 @@
 새로 생성된 모든 모듈들이 정상적으로 임포트되는지 확인
 """
 
+import sys, os
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/.."))
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/../src"))
+
 def test_imports():
     """모든 모듈 임포트 테스트"""
     
@@ -22,20 +26,20 @@ def test_imports():
         
         # 코어 모듈 테스트
         print("🔧 Core 모듈 테스트...")
-        from core.data_processing import DataProcessor
-        from core.clustering import ClusterAnalyzer
-        from core.deep_learning_models import DeepLearningModels
+        from segmentation.data_processing import DataProcessor
+        from segmentation.clustering import ClusterAnalyzer
+        from segmentation.models import DeepLearningModels
         print("✅ Core 모듈 임포트 성공")
         
         # 페이지 모듈 테스트
         print("📄 Pages 모듈 테스트...")
-        from pages.data_overview import show_data_overview_page
-        from pages.exploratory_analysis import show_exploratory_analysis_page
-        from pages.clustering_analysis import show_clustering_analysis_page
-        from pages.pca_analysis import show_pca_analysis_page
-        from pages.deep_learning_analysis import show_deep_learning_analysis_page
-        from pages.customer_prediction import show_customer_prediction_page
-        from pages.marketing_strategy import show_marketing_strategy_page
+        from segmentation.data_overview import show_data_overview_page
+        from segmentation.exploratory_analysis import show_exploratory_analysis_page
+        from segmentation.clustering_analysis import show_clustering_analysis_page
+        from segmentation.pca_analysis import show_pca_analysis_page
+        from segmentation.deep_learning_analysis import show_deep_learning_analysis_page
+        from segmentation.customer_prediction import show_customer_prediction_page
+        from segmentation.marketing_strategy import show_marketing_strategy_page
         print("✅ Pages 모듈 임포트 성공")
         
         print("\n🎉 모든 모듈 임포트 테스트 성공!")
@@ -58,12 +62,12 @@ def test_basic_functionality():
     
     try:
         # 데이터 프로세서 테스트
-        from core.data_processing import DataProcessor
+        from segmentation.data_processing import DataProcessor
         processor = DataProcessor()
         print("✅ DataProcessor 인스턴스 생성 성공")
         
         # 클러스터 분석기 테스트
-        from core.clustering import ClusterAnalyzer
+        from segmentation.clustering import ClusterAnalyzer
         analyzer = ClusterAnalyzer()
         print("✅ ClusterAnalyzer 인스턴스 생성 성공")
         

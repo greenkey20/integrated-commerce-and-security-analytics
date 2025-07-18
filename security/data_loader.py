@@ -9,6 +9,7 @@ import logging
 from typing import Tuple
 import warnings
 warnings.filterwarnings('ignore')
+from security.anomaly_detector import APILogAnomalyDetector
 
 class CICIDSDataLoader:
     """CICIDS2017 데이터셋 다운로드 및 전처리"""
@@ -320,7 +321,6 @@ def demo_data_loading():
 # 통합 실행 스크립트
 def setup_complete_system():
     """완전한 시스템 설정"""
-    from core.anomaly_detection import APILogAnomalyDetector
     
     print("🚀 API 로그 이상 탐지 시스템 설정 시작")
     

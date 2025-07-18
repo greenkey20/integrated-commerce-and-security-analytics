@@ -6,11 +6,11 @@ Online Retail 분석 통합 모듈
 """
 
 # 리팩토링된 모듈들 import
-from .retail_data_loader import RetailDataLoader
-from .retail_data_processor import RetailDataProcessor
-from .retail_feature_engineer import RetailFeatureEngineer
-from .retail_model_trainer import RetailModelTrainer
-from .retail_visualizer import RetailVisualizer
+from retail_analysis.data_loader import RetailDataLoader
+from retail_analysis.data_processor import RetailDataProcessor
+from retail_analysis.feature_engineer import RetailFeatureEngineer
+from retail_analysis.model_trainer import RetailModelTrainer
+from retail_analysis.visualizer import RetailVisualizer
 
 import pandas as pd
 import numpy as np

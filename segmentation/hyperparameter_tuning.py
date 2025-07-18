@@ -14,8 +14,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 # 프로젝트 내부 모듈 import
-from core.data_processing import DataProcessor
-from core.deep_learning_models import DeepLearningModels
+from segmentation.data_processing import DataProcessor
+from segmentation.models import DeepLearningModels
 from config.settings import DeepLearningConfig
 import streamlit as st
 

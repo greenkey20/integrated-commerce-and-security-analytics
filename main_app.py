@@ -9,6 +9,7 @@ import streamlit as st
 import warnings
 import sys
 import os
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/src"))
 
 # 현재 디렉토리를 Python 경로에 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -22,14 +23,14 @@ from config.settings import AppConfig, UIConfig
 from utils.font_manager import FontManager
 
 # 페이지 모듈들
-from src.pages.data_overview import show_data_overview_page
-from src.pages.exploratory_analysis import show_exploratory_analysis_page
-from src.pages.clustering_analysis import show_clustering_analysis_page
-from src.pages.pca_analysis import show_pca_analysis_page
-from src.pages.deep_learning_analysis import show_deep_learning_analysis_page
-from src.pages.customer_prediction import show_customer_prediction_page
-from src.pages.marketing_strategy import show_marketing_strategy_page
-from src.pages.retail_analysis import show_retail_analysis_page
+from segmentation.data_overview import show_data_overview_page
+from segmentation.exploratory_analysis import show_exploratory_analysis_page
+from segmentation.clustering_analysis import show_clustering_analysis_page
+from segmentation.pca_analysis import show_pca_analysis_page
+from segmentation.deep_learning_analysis import show_deep_learning_analysis_page
+from segmentation.customer_prediction import show_customer_prediction_page
+from segmentation.marketing_strategy import show_marketing_strategy_page
+from src.pages.retail.analysis import show_retail_analysis_page
 
 
 def initialize_app():

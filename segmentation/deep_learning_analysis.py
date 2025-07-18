@@ -15,9 +15,9 @@ from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score
-from core.data_processing import DataProcessor
-from core.clustering import ClusterAnalyzer
-from core.deep_learning_models import DeepLearningModels, TENSORFLOW_AVAILABLE
+from segmentation.data_processing import DataProcessor
+from segmentation.clustering import ClusterAnalyzer
+from segmentation.models import DeepLearningModels, TENSORFLOW_AVAILABLE
 
 # TensorFlow 관련 import (이미 deep_learning_models에서 처리됨)
 if TENSORFLOW_AVAILABLE:
