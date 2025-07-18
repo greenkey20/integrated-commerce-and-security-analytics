@@ -29,6 +29,7 @@ from app_modules.pca_analysis import show_pca_analysis_page
 from app_modules.deep_learning_analysis import show_deep_learning_analysis_page
 from app_modules.customer_prediction import show_customer_prediction_page
 from app_modules.marketing_strategy import show_marketing_strategy_page
+from app_modules.retail_analysis import show_retail_analysis_page
 
 
 def initialize_app():
@@ -90,6 +91,8 @@ def setup_sidebar():
     with st.sidebar.expander("💡 사용 가이드"):
         st.markdown("""
         **분석 순서 권장:**
+        
+        **👍 Mall Customer 분석 (기본):**
         1. 📊 데이터 개요 - 기본 정보 파악
         2. 🔍 탐색적 분석 - 패턴 발견
         3. 🎯 클러스터링 - 고객 세분화
@@ -97,6 +100,12 @@ def setup_sidebar():
         5. 🧠 딥러닝 - 고급 모델링
         6. 🔮 고객 예측 - 실제 적용
         7. 📈 마케팅 전략 - 비즈니스 활용
+        
+        **🚀 Online Retail 분석 (고급):**
+        - 대용량 실무 데이터 분석
+        - "혼공머신" 연계 선형회귀 학습
+        - ADP 실기 대비 특성 공학
+        - 단계별 체계적 학습 경험
         """)
 
     # 프로젝트 정보
@@ -236,6 +245,9 @@ def route_to_page(menu):
         elif menu == "마케팅 전략":
             show_marketing_strategy_page()
             
+        elif menu == "온라인 리테일 분석":
+            show_retail_analysis_page()
+            
         else:
             st.error(f"알 수 없는 메뉴: {menu}")
             
@@ -255,14 +267,20 @@ def show_footer():
     **📋 애플리케이션 정보**
     
     **개발 정보:** 이 애플리케이션은 K-means 클러스터링을 활용한 고객 세분화 분석 도구입니다.  
-    **데이터:** Mall Customer Segmentation Dataset  
+    **데이터:** Mall Customer Segmentation Dataset & Online Retail Dataset  
     **기술 스택:** Python, Streamlit, Scikit-learn, TensorFlow, Plotly
     **버전:** {AppConfig.VERSION}
     **구조:** 모듈화된 페이지 기반 아키텍처
     
+    **🎆 새로운 기능:**
+    - **"혼공머신" 연계 학습**: 선형회귀 알고리즘 실무 적용
+    - **대용량 데이터 처리**: 50만+ 거래 데이터 분석 경험
+    - **ADP 실기 대비**: 특성 공학, groupby/agg 활용
+    - **단계별 학습**: 데이터 로딩부터 모델 평가까지
+    
     **🏗️ 모듈 구조:**
     - `config/`: 전역 설정 관리
-    - `core/`: 핵심 비즈니스 로직 (데이터 처리, 클러스터링, 딥러닝)
+    - `core/`: 핵심 비즈니스 로직 (데이터 처리, 클러스터링, 딥러닝, 리테일 분석)
     - `utils/`: 유틸리티 함수 (폰트 관리 등)
     - `app_modules/`: 각 페이지별 UI 로직
     """)
