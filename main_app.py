@@ -22,14 +22,14 @@ from config.settings import AppConfig, UIConfig
 from utils.font_manager import FontManager
 
 # 페이지 모듈들
-from app_modules.data_overview import show_data_overview_page
-from app_modules.exploratory_analysis import show_exploratory_analysis_page
-from app_modules.clustering_analysis import show_clustering_analysis_page
-from app_modules.pca_analysis import show_pca_analysis_page
-from app_modules.deep_learning_analysis import show_deep_learning_analysis_page
-from app_modules.customer_prediction import show_customer_prediction_page
-from app_modules.marketing_strategy import show_marketing_strategy_page
-from app_modules.retail_analysis import show_retail_analysis_page
+from src.pages.data_overview import show_data_overview_page
+from src.pages.exploratory_analysis import show_exploratory_analysis_page
+from src.pages.clustering_analysis import show_clustering_analysis_page
+from src.pages.pca_analysis import show_pca_analysis_page
+from src.pages.deep_learning_analysis import show_deep_learning_analysis_page
+from src.pages.customer_prediction import show_customer_prediction_page
+from src.pages.marketing_strategy import show_marketing_strategy_page
+from src.pages.retail_analysis import show_retail_analysis_page
 
 
 def initialize_app():

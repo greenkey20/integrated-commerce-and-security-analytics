@@ -1,0 +1,13 @@
+{
+  "model_type": "hybrid",
+  "version": "1.0.0",
+  "training_date": "2025-07-18",
+  "sequence_length": 10,
+  "feature_columns": [
+    "requests_per_minute",
+    "request_size",
+    "content_length",
+    "processing_time"
+  ],
+  "is_trained": true
+}
