@@ -30,6 +30,7 @@ from segmentation.pca_analysis import show_pca_analysis_page
 from segmentation.deep_learning_analysis import show_deep_learning_analysis_page
 from segmentation.customer_prediction import show_customer_prediction_page
 from segmentation.marketing_strategy import show_marketing_strategy_page
+from segmentation.security_analysis import show_security_analysis_page
 from src.pages.retail.analysis import show_retail_analysis_page
 
 
@@ -107,6 +108,12 @@ def setup_sidebar():
         - "혼공머신" 연계 선형회귀 학습
         - ADP 실기 대비 특성 공학
         - 단계별 체계적 학습 경험
+        
+        **🔒 CICIDS2017 보안 분석 (전문):**
+        - 네트워크 이상 탐지 실무 경험
+        - 하이브리드 딥러닝 모델 (MLP+CNN)
+        - 실시간 보안 모니터링
+        - 금융권 SI 보안 전문가 양성
         """)
 
     # 프로젝트 정보
@@ -249,6 +256,9 @@ def route_to_page(menu):
         elif menu == "온라인 리테일 분석":
             show_retail_analysis_page()
             
+        elif menu == "보안 이상 탐지 분석":
+            show_security_analysis_page()
+            
         else:
             st.error(f"알 수 없는 메뉴: {menu}")
             
@@ -269,7 +279,7 @@ def show_footer():
     
     **개발 정보:** 이 애플리케이션은 K-means 클러스터링을 활용한 고객 세분화 분석 도구입니다.  
     **데이터:** Mall Customer Segmentation Dataset & Online Retail Dataset  
-    **기술 스택:** Python, Streamlit, Scikit-learn, TensorFlow, Plotly
+    **기술 스택:** Python, Streamlit, Scikit-learn, TensorFlow, Plotly, CICIDS2017
     **버전:** {AppConfig.VERSION}
     **구조:** 모듈화된 페이지 기반 아키텍처
     
@@ -278,6 +288,8 @@ def show_footer():
     - **대용량 데이터 처리**: 50만+ 거래 데이터 분석 경험
     - **ADP 실기 대비**: 특성 공학, groupby/agg 활용
     - **단계별 학습**: 데이터 로딩부터 모델 평가까지
+    - **네트워크 보안 분석**: CICIDS2017 데이터셋 활용 이상 탐지
+    - **하이브리드 딥러닝**: MLP + CNN 결합 모델로 실시간 보안 탐지
     
     **🏗️ 모듈 구조:**
     - `config/`: 전역 설정 관리
