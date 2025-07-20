@@ -21,3 +21,63 @@ ENV/
 
 # User-specific
 draft/
+
+# Byte-compiled / optimized / DLL files
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+
+# Virtual environments
+venv/
+env/
+ENV/
+.venv/
+
+# Python specific
+.Python/
+
+# macOS
+.DS_Store
+
+# Streamlit
+.streamlit/
+
+# User-specific
+draft/
+
+# Trained models (Add specific extensions you use)
+*.h5
+*.keras
+*.pt
+*.pth
+*.pkl
+*.joblib
+# models/saved_models/
+# If you decide to keep core/security/saved_models, add it. 
+# Otherwise, remove this line after consolidating.
+# core/security/saved_models/
+
+# Data files (Exclude large raw/processed data)
+# Adjust these patterns based on what specific data files you want to ignore.
+# If you use Git LFS for some data, remove them from here.
+# data/*.csv
+# data/*.txt
+# data/*.json
+# data/cicids2017/
+# data/processed/
+data/cicids2017/Monday-WorkingHours.pcap_ISCX.csv
+# You might want to be more specific, e.g., data/raw/*.csv, data/processed/*.npy
+
+# Log files
+logs/
+*.log
+
+# Jupyter Notebook
+.ipynb_checkpoints/
+
+# IDE-specific files (e.g., VS Code)
+.vscode/
+
+# Other temporary or generated files
+# Add any other temporary files your scripts might generate
