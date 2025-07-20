@@ -11,8 +11,8 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from retail_analysis.data_loader import RetailDataLoader
-from retail_analysis.visualizer import RetailVisualizer
+from core.retail.data_loader import RetailDataLoader
+from core.retail.visualizer import RetailVisualizer
 import warnings
 
 warnings.filterwarnings("ignore")

@@ -14,8 +14,8 @@ from sklearn.model_selection import train_test_split
 from sklearn.preprocessing import StandardScaler
 
 # 프로젝트 내부 모듈 import
-from segmentation.data_processing import DataProcessor
-from segmentation.models import DeepLearningModels
+from core.segmentation.data_processing import CustomerDataProcessor
+from core.segmentation.models import DeepLearningModels
 from config.settings import DeepLearningConfig
 import streamlit as st
 
@@ -24,7 +24,7 @@ class HyperparameterTuner:
     """하이퍼파라미터 튜닝을 담당하는 클래스"""
     
     def __init__(self):
-        self.data_processor = DataProcessor()
+        self.data_processor = CustomerDataProcessor()
         self.dl_models = DeepLearningModels()
         self.results_history = []
         

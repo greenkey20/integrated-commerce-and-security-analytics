@@ -6,7 +6,7 @@
 
 import streamlit as st
 import pandas as pd
-from segmentation.data_processing import DataProcessor
+from core.segmentation.data_processing import DataProcessor
 
 
 def show_data_overview_page():

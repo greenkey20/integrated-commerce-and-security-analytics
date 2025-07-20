@@ -15,9 +15,9 @@ from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score
-from segmentation.data_processing import DataProcessor
-from segmentation.clustering import ClusterAnalyzer
-from segmentation.models import DeepLearningModels, TENSORFLOW_AVAILABLE
+from core.segmentation.data_processing import CustomerDataProcessor
+from core.segmentation.clustering import ClusterAnalyzer
+from core.segmentation.models import DeepLearningModels, TENSORFLOW_AVAILABLE
 
 # TensorFlow 관련 import (이미 deep_learning_models에서 처리됨)
 if TENSORFLOW_AVAILABLE:
@@ -91,7 +91,7 @@ def show_deep_learning_analysis_page():
     st.subheader("📊 1단계: 기본 데이터 준비")
 
     # 데이터 로드
-    data_processor = DataProcessor()
+    data_processor = CustomerDataProcessor()
     data = data_processor.load_data()
     
     # Session State에서 클러스터 개수 가져오기
@@ -572,7 +572,7 @@ def _display_autoencoder_results(encoding_dim):
     st.subheader("🔍 오토인코더 vs PCA 비교")
     
     # 데이터 로드 (시각화용)
-    data_processor = DataProcessor()
+    data_processor = CustomerDataProcessor()
     data = data_processor.load_data()
     
     col1, col2 = st.columns(2)

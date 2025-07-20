@@ -23,14 +23,14 @@ from config.settings import AppConfig, UIConfig
 from utils.font_manager import FontManager
 
 # 페이지 모듈들
-from segmentation.data_overview import show_data_overview_page
-from segmentation.exploratory_analysis import show_exploratory_analysis_page
-from segmentation.clustering_analysis import show_clustering_analysis_page
-from segmentation.pca_analysis import show_pca_analysis_page
-from segmentation.deep_learning_analysis import show_deep_learning_analysis_page
-from segmentation.customer_prediction import show_customer_prediction_page
-from segmentation.marketing_strategy import show_marketing_strategy_page
-from segmentation.security_analysis import show_security_analysis_page
+from src.pages.segmentation.data_overview import show_data_overview_page
+from src.pages.segmentation.exploratory_analysis import show_exploratory_analysis_page
+from src.pages.segmentation.clustering_analysis import show_clustering_analysis_page
+from src.pages.segmentation.pca_analysis import show_pca_analysis_page
+from src.pages.segmentation.deep_learning_analysis import show_deep_learning_analysis_page
+from src.pages.segmentation.customer_prediction import show_customer_prediction_page
+from src.pages.segmentation.marketing_strategy import show_marketing_strategy_page
+from src.pages.security.security_analysis_page import show_security_analysis_page
 from src.pages.retail.analysis import show_retail_analysis_page
 
 

@@ -1,16 +1,16 @@
 """
-Online Retail 분석 통합 모듈
+Online Retail 분석 통합 관리자
 
 리팩토링된 모듈들의 통합 진입점을 제공합니다.
-이 파일은 기존 코드와의 호환성을 위해 유지됩니다.
+core/retail 모듈로 이동되어 UI와 로직이 완전히 분리되었습니다.
 """
 
-# 리팩토링된 모듈들 import
-from retail_analysis.data_loader import RetailDataLoader
-from retail_analysis.data_processor import RetailDataProcessor
-from retail_analysis.feature_engineer import RetailFeatureEngineer
-from retail_analysis.model_trainer import RetailModelTrainer
-from retail_analysis.visualizer import RetailVisualizer
+# core.retail 모듈들 import
+from .data_loader import RetailDataLoader
+from .data_processor import RetailDataProcessor
+from .feature_engineer import RetailFeatureEngineer
+from .model_trainer import RetailModelTrainer
+from .visualizer import RetailVisualizer
 
 import pandas as pd
 import numpy as np
@@ -25,6 +25,7 @@ class RetailAnalysisManager:
     Online Retail 분석 전체 과정을 관리하는 통합 클래스
     
     리팩토링된 개별 모듈들을 조율하여 전체 분석 워크플로우를 제공합니다.
+    UI와 완전히 분리된 비즈니스 로직을 담당합니다.
     """
     
     def __init__(self):

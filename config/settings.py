@@ -68,6 +68,55 @@ class DeepLearningConfig:
     VALIDATION_SPLIT = 0.2
     EARLY_STOPPING_PATIENCE = 15
 
+class SecurityConfig:
+    """보안 및 이상탐지 관련 설정"""
+    # 모델 기본값
+    RANDOM_SEED = 42
+    DEFAULT_MODEL_TYPE = 'hybrid'
+    
+    # 신경망 구조
+    CNN_SEQUENCE_LENGTH = 10
+    MLP_HIDDEN_UNITS = [128, 64, 32]
+    DROPOUT_RATES = [0.3, 0.2]
+    
+    # 훈련 파라미터
+    DEFAULT_EPOCHS = 10
+    BATCH_SIZE = 32
+    VALIDATION_SPLIT = 0.2
+    EARLY_STOPPING_PATIENCE = 3
+    LEARNING_RATE_PATIENCE = 2
+    
+    # 실시간 모니터링
+    ALERT_THRESHOLD = 0.7
+    MAX_RECENT_ANOMALIES = 100
+    
+    # 특성 추출 설정
+    BUSINESS_HOUR_START = 9
+    BUSINESS_HOUR_END = 17
+    WEEKEND_THRESHOLD = 5  # 0=월요일, 5=토요일
+    
+    # 위험도 레벨 임계값
+    RISK_THRESHOLDS = {
+        'CRITICAL': 0.9,
+        'HIGH': 0.7,
+        'MEDIUM': 0.5,
+        'LOW': 0.0
+    }
+
+class LoggingConfig:
+    """로깅 관련 설정"""
+    LOG_LEVEL = "INFO"
+    LOG_FORMAT = '%(asctime)s - %(name)s - %(levelname)s - %(message)s'
+    
+    # 로그 파일 설정
+    API_ACCESS_LOG = "logs/api_access.log"
+    SECURITY_LOG = "logs/security.log"
+    ERROR_LOG = "logs/error.log"
+    
+    # 로그 로테이션
+    MAX_LOG_SIZE = "10MB"
+    BACKUP_COUNT = 5
+
 class UIConfig:
     """UI 관련 설정"""
     SIDEBAR_WIDTH = 300
