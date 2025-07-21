@@ -15,7 +15,7 @@ def test_imports():
     
     tests = [
         # 1. 데이터 계층 테스트
-        ("data._processor", "DataProcessor"),
+        ("data.processors.data_processor", "DataProcessor"),
         ("data.loaders.retail_loader", "RetailDataLoader"),
         ("data.loaders.security_loader", "SecurityDataLoader"),
         
@@ -71,7 +71,7 @@ def test_data_loading():
     print("-" * 30)
     
     try:
-        from data._processor import DataProcessor
+        from data.processors.data_processor import DataProcessor
         
         processor = DataProcessor()
         data = processor.load_data()

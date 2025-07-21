@@ -11,7 +11,7 @@ import plotly.express as px
 import plotly.graph_objects as go
 import matplotlib.pyplot as plt
 from matplotlib.patches import Ellipse
-from data._processor import DataProcessor
+from data.processors.data_processor import DataProcessor
 from core.segmentation.clustering import ClusterAnalyzer
 from utils.font_manager import FontManager
 

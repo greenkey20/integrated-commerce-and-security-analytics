@@ -15,7 +15,7 @@ from sklearn.metrics import confusion_matrix, classification_report
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score
-from data._processor import DataProcessor
+from data.processors.data_processor import DataProcessor
 from core.segmentation.clustering import ClusterAnalyzer
 from core.segmentation.models import DeepLearningModels, TENSORFLOW_AVAILABLE
 

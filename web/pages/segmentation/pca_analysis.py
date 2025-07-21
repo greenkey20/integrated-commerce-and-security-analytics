@@ -13,7 +13,7 @@ from sklearn.preprocessing import StandardScaler
 from sklearn.decomposition import PCA
 from sklearn.cluster import KMeans
 from sklearn.metrics import adjusted_rand_score, normalized_mutual_info_score
-from data._processor import DataProcessor
+from data.processors.data_processor import DataProcessor
 
 
 def show_pca_analysis_page():
