@@ -5,9 +5,9 @@ Core retail analysis module
 UI로부터 분리된 비즈니스 로직 및 데이터 처리 기능을 제공합니다.
 """
 
-from .data_loader import RetailDataLoader
-from .data_processor import RetailDataProcessor
-from .feature_engineer import RetailFeatureEngineer
+from data.loaders.retail_loader import RetailDataLoader
+from .retail_data_processor import RetailDataProcessor
+from .retail_feature_engineer import RetailFeatureEngineer
 from .model_trainer import RetailModelTrainer
 from .visualizer import RetailVisualizer
 from .analysis_manager import RetailAnalysisManager

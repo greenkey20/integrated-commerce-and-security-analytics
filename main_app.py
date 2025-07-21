@@ -9,7 +9,7 @@ import streamlit as st
 import warnings
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/src"))
+sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/web"))
 
 # 현재 디렉토리를 Python 경로에 추가
 current_dir = os.path.dirname(os.path.abspath(__file__))
@@ -23,15 +23,17 @@ from config.settings import AppConfig, UIConfig
 from utils.font_manager import FontManager
 
 # 페이지 모듈들
-from src.pages.segmentation.data_overview import show_data_overview_page
-from src.pages.segmentation.exploratory_analysis import show_exploratory_analysis_page
-from src.pages.segmentation.clustering_analysis import show_clustering_analysis_page
-from src.pages.segmentation.pca_analysis import show_pca_analysis_page
-from src.pages.segmentation.deep_learning_analysis import show_deep_learning_analysis_page
-from src.pages.segmentation.customer_prediction import show_customer_prediction_page
-from src.pages.segmentation.marketing_strategy import show_marketing_strategy_page
-from src.pages.security.security_analysis_page import show_security_analysis_page
-from src.pages.retail.analysis import show_retail_analysis_page
+from web.pages.segmentation.data_overview import show_data_overview_page
+from web.pages.segmentation.exploratory_analysis import show_exploratory_analysis_page
+from web.pages.segmentation.clustering_analysis import show_clustering_analysis_page
+from web.pages.segmentation.pca_analysis import show_pca_analysis_page
+from web.pages.segmentation.deep_learning_analysis import show_deep_learning_analysis_page
+from web.pages.segmentation.customer_prediction import show_customer_prediction_page
+from web.pages.segmentation.marketing_strategy import show_marketing_strategy_page
+from web.pages.retail.analysis import show_retail_analysis_page
+
+# 보안 페이지는 web.pages로부터 import (임시 비활성화 상태)
+from web.pages import show_security_analysis_page
 
 
 def initialize_app():
@@ -257,7 +259,21 @@ def route_to_page(menu):
             show_retail_analysis_page()
             
         elif menu == "보안 이상 탐지 분석":
-            show_security_analysis_page()
+            if show_security_analysis_page is not None:
+                show_security_analysis_page()
+            else:
+                st.warning("⚠️ 보안 분석 기능은 현재 임시 비활성화되어 있습니다.")
+                st.info("""
+                **Phase 1-2 리팩토링 진행 중:**
+                
+                보안 분석 기능은 데이터 계층 리팩토링 완료 후 다시 활성화될 예정입니다.
+                
+                **현재 사용 가능한 기능:**
+                - 📊 데이터 개요
+                - 🔍 탐색적 데이터 분석
+                - 🎯 클러스터링 분석
+                - 💰 온라인 리테일 분석
+                """)
             
         else:
             st.error(f"알 수 없는 메뉴: {menu}")

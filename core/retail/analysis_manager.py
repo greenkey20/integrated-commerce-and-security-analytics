@@ -6,7 +6,7 @@ core/retail 모듈로 이동되어 UI와 로직이 완전히 분리되었습니�
 """
 
 # core.retail 모듈들 import
-from .data_loader import RetailDataLoader
+from data.loaders.retail_loader import RetailDataLoader
 from .data_processor import RetailDataProcessor
 from .feature_engineer import RetailFeatureEngineer
 from .model_trainer import RetailModelTrainer
