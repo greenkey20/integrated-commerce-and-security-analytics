@@ -1,0 +1,6 @@
+# 이 파일은 Phase 1-1 리팩토링 과정에서 제거됨
+# 백업: docs/security_data_loader_backup.py  
+# 새 위치: data/loaders/security_loader.py
+# 제거일: 2025-07-20
+
+pass
