@@ -78,6 +78,8 @@ logs/
 
 # IDE-specific files (e.g., VS Code)
 .vscode/
+.idea/
+*.iml
 
 # Other temporary or generated files
 # Add any other temporary files your scripts might generate
