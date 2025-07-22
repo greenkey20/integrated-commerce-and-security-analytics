@@ -22,7 +22,7 @@ import logging
 
 # 새로운 데이터 계층 import
 try:
-    from data.base import DataValidator, DataCleaner
+    from ..base import DataValidator, DataCleaner
 except ImportError:
     # 하위 호환성을 위한 fallback
     DataValidator = None
