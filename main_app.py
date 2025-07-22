@@ -9,12 +9,16 @@ import streamlit as st
 import warnings
 import sys
 import os
-sys.path.insert(0, os.path.abspath(os.path.dirname(__file__) + "/web"))
 
-# 현재 디렉토리를 Python 경로에 추가
+# Python 경로 설정 (더 확실하게)
 current_dir = os.path.dirname(os.path.abspath(__file__))
 if current_dir not in sys.path:
     sys.path.insert(0, current_dir)
+
+# web 디렉토리도 경로에 추가
+web_dir = os.path.join(current_dir, "web")
+if web_dir not in sys.path:
+    sys.path.insert(0, web_dir)
 
 warnings.filterwarnings("ignore")
 
