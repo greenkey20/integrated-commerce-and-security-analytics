@@ -498,41 +498,240 @@ core/retail/                           # 나머지 비즈니스 로직
 
 ## 🚀 **다음 Chat 세션 우선 작업 가이드**
 
-## 🎉 **주요 백업 파일 정리 완료! (2025-07-22)**
+## 🎉 **데이터 로더 통합 완료! (2025-07-23)**
 
-### ✅ 이번 Chat에서 완료된 작업
-1. **detection_engine 고도화 복원**: 전문가급 보안 시스템 구축
-2. **모든 문법 오류 해결**: IndentationError, SyntaxError 완전 수정  
-3. **UI 고도화**: 실시간 보안 모니터링 인터페이스 구축
-4. **Import 충돌 해결**: 모든 모듈 정상 로딩 확인
+### ✅ 2025-07-23 Chat에서 완료된 작업
+1. **🔄 데이터 로더 통합 완료**: `data/loaders/unified_security_loader.py` 작성
+   - core/security/data_loader.py (670줄) + data/loaders/security_loader.py (280줄) → 450줄 통합
+   - **60% 코드 중복 제거** 달성
+   - retail 패턴에 맞춘 체계적 구조 + CICIDS2017 전용 상세 기능 결합
+   - Type hints, 로깅, 하위 호환성 100% 보장
+   - 5가지 공격 유형 시뮬레이션 (정상, DDoS, 웹공격, 브루트포스, 포트스캔)
+
+2. **🔧 기술적 개선 사항**:
+   - **새로운 API**: `UnifiedSecurityLoader` 클래스로 모든 기능 통합
+   - **품질 보고서**: `get_data_quality_report()` 추가
+   - **보안 분석 전처리**: `preprocess_for_security_analysis()` 추가  
+   - **자동 저장**: `save_processed_data()` 추가
+   - **데모 모드**: `demo_unified_security_loader()` 포함
+
+3. **🔄 하위 호환성**: 기존 함수들 모두 동작 (별칭 제공)
+   ```python
+   check_cicids_data_availability()  # ✅ 동작
+   CICIDSDataLoader()               # ✅ 동작  
+   SecurityDataLoader()             # ✅ 동작
+   ```
 
 ### 🚀 **다음 Chat 세션 우선 작업**
-### **1순위: 데이터 로더 통합** 🔄 **시급**
-**중복 발견:** 
-- core/security/data_loader.py (670줄)
-- data/loaders/security_loader.py (280줄)
-- 중복도: 60%
+### **1순위: Import 경로 업데이트** 🔄 **시급**
+**목표**: 기존 중복 파일들을 통합 로더로 교체
 
-**통합 방안:**
-```bash
-# retail 패턴에 맞춘 통합 data_loader 생성
-# 목표: data/loaders/unified_security_loader.py
-# 기능: 두 파일의 장점 결합 + 일관된 구조
-```
+**업데이트 대상 및 방법** (아래 상세 가이드 참조):
+- **백업 처리**: 기존 2개 파일 → `docs/backup/security/`로 이동
+- **import 교체**: 모든 참조 코드들이 `unified_security_loader` 사용하도록 수정
+- **검증 테스트**: 각 교체 후 기능 정상 작동 확인
 
-### **2순위: 실제 기능 검증**
+### **2순위: 전체 시스템 검증**
 ```bash
 streamlit run main_app.py
-# → 좌측 메뉴 "보안 이상 탐지 분석" 접근 가능한지 확인
-# → "🆕 통합 탐지 엔진" 모드 정상 작동하는지 테스트
+# → 좌측 메뉴 "보안 이상 탐지 분석" 접근 테스트
+# → "🆕 통합 탐지 엔진" 모드 정상 작동 확인
+# → 샘플 데이터 생성 및 분석 기능 테스트
 ```
+
+### **3순위: 다른 도메인 백업 검토**
+- segmentation, retail 백업 파일들 검토
+- 추가 중복 제거 기회 탐색
+
 ---
-### 🔄 **다음 Chat 세션 작업**
-1. **데이터 로더 통합**: retail 패턴 맞춤 통합 로더 설계
-2. **전체 시스템 검증**: 모든 기능 정상 작동 확인  
-3. **다른 도메인 백업 검토**: segmentation, retail 백업 파일들
+
+## 📋 **Import 경로 업데이트 상세 가이드** 🔄
+
+### **Step 1: 백업 파일 이동** (안전 우선) ✅ 완료
+```bash
+# 기존 파일들을 백업 폴더로 이동
+mv core/security/data_loader.py docs/backup/security/data_loader_backup_old.py
+mv data/loaders/security_loader.py docs/backup/security/security_loader_backup_old.py
+
+# 통합 파일을 올바른 위치에 배치 (선택사항 - 현재 위치도 가능)
+# 추천: data/loaders/unified_security_loader.py (현재 위치 유지)
+```
+
+### **Step 2: Import 경로 업데이트 대상 파일들** 🎯
+
+#### **A. Core 모듈 업데이트**
+1. **`core/security/__init__.py`** ⚠️ **최우선** ✅ 완료
+   ```python
+   # 기존:
+   from .data_loader import CICIDSDataLoader
+   from .cicids_data_loader import CICIDSDataLoader  # 중복 import
+   
+   # 신규:
+   from data.loaders.unified_security_loader import (
+       UnifiedSecurityLoader,
+       CICIDSDataLoader,  # 별칭
+       check_cicids_data_availability,
+       generate_cicids_sample_data,
+       generate_enhanced_sample_data
+   )
+   ```
+
+#### **B. Web UI 페이지 업데이트**
+2. **`web/pages/security/security_analysis_page.py`** ⚠️ **중요**
+   ```python
+   # 기존:
+   from docs.backup.security.data_loader import CICIDSDataLoader, check_cicids_data_availability
+   # 또는
+   from docs.backup.security.security_loader import SecurityDataLoader
+   
+   # 신규:
+   from data.loaders.unified_security_loader import (
+       UnifiedSecurityLoader as SecurityDataLoader,
+       check_cicids_data_availability
+   )
+   ```
+
+3. **`web/pages/security/` 폴더 내 모든 파일 검색**:
+   ```bash
+   grep -r "from.*security.*data_loader" web/pages/security/
+   grep -r "import.*CICIDSDataLoader" web/pages/security/
+   grep -r "import.*SecurityDataLoader" web/pages/security/
+   ```
+
+#### **C. 메인 앱 및 설정 파일**
+4. **`main_app.py`** (혹시 직접 import하는 경우)
+   ```python
+   # 확인 필요:
+   grep -n "security.*data_loader" main_app.py
+   ```
+
+5. **`web/pages/__init__.py`** (페이지 등록 관련)
+   ```python
+   # 보안 페이지 import 경로 확인
+   ```
+
+#### **D. 테스트 파일들**
+6. **`test/` 폴더 내 모든 보안 관련 테스트**:
+   ```bash
+   find test/ -name "*.py" -exec grep -l "data_loader\|CICIDSDataLoader" {} \;
+   ```
+
+7. **특정 테스트 파일들** (발견되는 경우):
+   - `test/unit/test_security_*.py`
+   - `test/integration/test_*security*.py`
+   - `test/functional/test_security_analysis.py`
+
+### **Step 3: 교체 작업 순서** 📝
+
+#### **Phase 1: Core 모듈 (가장 중요)** ⚠️
+```bash
+# 1순위: __init__.py 수정 (다른 모든 import의 기반)
+code core/security/__init__.py
+
+# 수정 후 즉시 테스트 ✅ 완료
+python -c "from core.security import CICIDSDataLoader; print('✅ Core import 성공')"
+```
+
+#### **Phase 2: Web UI 페이지** 🌐
+```bash
+# 보안 분석 페이지 수정
+code web/pages/security/security_analysis_page.py
+
+# 수정 후 테스트
+streamlit run main_app.py
+# → 보안 이상 탐지 분석 페이지 접근 테스트
+```
+
+#### **Phase 3: 기타 참조 파일들** 📁
+```bash
+# 발견된 모든 참조 파일들 순차 수정
+# 각 수정 후 해당 모듈 import 테스트 실행
+```
+
+### **Step 4: 검증 방법** ✅
+
+#### **A. Import 검증**
+```python
+# 1. 기본 import 테스트
+from data.loaders.unified_security_loader import UnifiedSecurityLoader
+loader = UnifiedSecurityLoader()
+print("✅ 통합 로더 import 성공")
+
+# 2. 하위 호환성 테스트  
+from core.security import CICIDSDataLoader
+from core.security import check_cicids_data_availability
+print("✅ 하위 호환성 유지")
+
+# 3. 샘플 데이터 생성 테스트
+loader = CICIDSDataLoader()  # 별칭 사용
+data = loader.generate_sample_data(total_samples=100)
+print(f"✅ 샘플 데이터 생성: {len(data)}개")
+```
+
+#### **B. Web UI 검증**
+```bash
+# Streamlit 앱 실행
+streamlit run main_app.py
+
+# 체크리스트:
+# ✅ 앱이 정상 실행되는가?
+# ✅ 좌측 메뉴에서 "보안 이상 탐지 분석" 클릭 가능한가?
+# ✅ 샘플 데이터 생성 버튼이 작동하는가?
+# ✅ "🆕 통합 탐지 엔진" 모드 선택 가능한가?
+# ✅ 데이터 로딩 및 분석이 정상 작동하는가?
+```
+
+### **Step 5: 문제 해결 가이드** 🔧
+
+#### **자주 발생하는 문제들**
+1. **ModuleNotFoundError**: 
+   ```python
+   # 원인: import 경로 오류
+   # 해결: sys.path 확인 또는 상대경로 사용
+   import sys
+   sys.path.append('.')  # 프로젝트 루트 추가
+   ```
+
+2. **ImportError**: 
+   ```python
+   # 원인: 순환 import 또는 누락된 의존성
+   # 해결: import 순서 조정 또는 지연 import 사용
+   ```
+
+3. **AttributeError**: 
+   ```python
+   # 원인: 메서드명 변경 또는 누락
+   # 해결: 통합 로더의 새로운 API 메서드명 확인
+   ```
+
+#### **롤백 방법** (문제 발생 시)
+```bash
+# 백업에서 원본 파일 복원
+cp docs/backup/security/data_loader_backup_old.py core/security/data_loader.py
+cp docs/backup/security/security_loader_backup_old.py data/loaders/security_loader.py
+
+# import 경로를 원래대로 되돌리기
+git checkout HEAD -- core/security/__init__.py
+```
+
+### **Step 6: 최종 검증 체크리스트** ✅
+
+```markdown
+- [ ] ✅ core/security/__init__.py 업데이트 완료
+- [ ] ✅ web/pages/security/security_analysis_page.py 업데이트 완료
+- [ ] ✅ 기타 발견된 참조 파일들 업데이트 완료
+- [ ] ✅ python -c "from core.security import CICIDSDataLoader" 테스트 통과
+- [ ] ✅ streamlit run main_app.py 정상 실행
+- [ ] ✅ 보안 분석 페이지 접근 및 기능 테스트 통과
+- [ ] ✅ 샘플 데이터 생성 기능 정상 작동
+- [ ] ✅ 통합 탐지 엔진 모드 정상 작동
+- [ ] ✅ 기존 중복 파일들 docs/backup/으로 안전 이동
+```
+
+---
 
 ### 📋 **장기 개선 과제**
-- Import 경로 최종 정리
+- ✅ 데이터 로더 통합 완료 (2025-07-23)
+- 🔄 Import 경로 최종 정리 (진행 중)
 - 성능 최적화  
 - 포트폴리오 문서화

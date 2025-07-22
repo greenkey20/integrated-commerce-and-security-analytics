@@ -65,7 +65,7 @@ except Exception as e:
 # 5단계: security_loader 개별 테스트 (문제가 여기일 가능성 높음)
 print("\n5. security_loader 개별 테스트:")
 try:
-    from data.loaders.security_loader import SecurityDataLoader
+    from docs.backup.security.security_loader import SecurityDataLoader
     print("   ✅ SecurityDataLoader import 성공")
 except Exception as e:
     print(f"   ❌ SecurityDataLoader import 실패: {e}")

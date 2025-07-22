@@ -15,7 +15,7 @@ warnings.filterwarnings('ignore')
 
 # Core 모듈에서 비즈니스 로직 import
 from core.security import (
-    CICIDSDataLoader,
+    # CICIDSDataLoader,
     SecurityModelBuilder, 
     AttackPatternAnalyzer,
     DetectionOrchestrator,
@@ -31,6 +31,10 @@ from core.security import (
     install_tensorflow
 )
 
+from data.loaders.unified_security_loader import (
+    UnifiedSecurityLoader as SecurityDataLoader,
+    check_cicids_data_availability
+)
 
 def show_security_analysis_page():
     """CICIDS2017 보안 이상 탐지 분석 페이지"""

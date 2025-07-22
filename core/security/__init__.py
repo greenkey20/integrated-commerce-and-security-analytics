@@ -10,7 +10,7 @@
 """
 
 # ✅ 데이터 로더 - 백업에서 복원 완료
-from .data_loader import (
+from data.loaders.unified_security_loader import (
     CICIDSDataLoader,
     check_cicids_data_availability,
     generate_cicids_sample_data,
