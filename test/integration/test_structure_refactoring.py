@@ -87,7 +87,7 @@ def test_class_instantiation():
     
     try:
         # DataProcessor 테스트
-        from data.processors.data_processor import DataProcessor
+        from data.processors.segmentation_data_processor import DataProcessor
         processor = DataProcessor()
         print("   ✅ DataProcessor 인스턴스 생성 성공")
         
@@ -108,7 +108,7 @@ def test_class_instantiation():
     
     try:
         # RetailDataProcessor 테스트
-        from core.retail.retail_data_processor import RetailDataProcessor
+        from data.processors.retail_data_processor import RetailDataProcessor
         
         column_mapping = {
             'invoice_no': 'InvoiceNo',
@@ -130,7 +130,7 @@ def test_class_instantiation():
     
     try:
         # RetailFeatureEngineer 테스트
-        from core.retail.retail_feature_engineer import RetailFeatureEngineer
+        from data.processors.retail_feature_engineer import RetailFeatureEngineer
         
         feature_engineer = RetailFeatureEngineer(column_mapping)
         print("   ✅ RetailFeatureEngineer 인스턴스 생성 성공")
@@ -162,7 +162,7 @@ def test_file_structure():
     print("-" * 30)
     
     expected_files = [
-        "data/data_processor.py",
+        "data/segmentation_data_processor.py",
         "core/retail/retail_data_processor.py", 
         "core/retail/retail_feature_engineer.py",
         "test/unit/simple_test.py",
@@ -177,7 +177,7 @@ def test_file_structure():
     
     missing_files = [
         "data/_processor.py",
-        "core/retail/data_processor.py",
+        "core/retail/segmentation_data_processor.py",
         "core/retail/feature_engineer.py",
         "debug_imports.py",
         "simple_test.py",

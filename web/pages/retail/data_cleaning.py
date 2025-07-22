@@ -6,12 +6,9 @@ Online Retail 데이터 정제 페이지
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
-import plotly.graph_objects as go
-from plotly.subplots import make_subplots
 
-from core.retail.retail_data_processor import RetailDataProcessor
+from data.processors.retail_data_processor import RetailDataProcessor
 import warnings
 
 warnings.filterwarnings("ignore")

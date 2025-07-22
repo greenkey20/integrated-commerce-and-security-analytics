@@ -6,8 +6,8 @@ UI로부터 분리된 비즈니스 로직 및 데이터 처리 기능을 제공�
 """
 
 from data.loaders.retail_loader import RetailDataLoader
-from .retail_data_processor import RetailDataProcessor
-from .retail_feature_engineer import RetailFeatureEngineer
+from data.processors.retail_data_processor import RetailDataProcessor
+from data.processors.retail_feature_engineer import RetailFeatureEngineer
 from .model_trainer import RetailModelTrainer
 from .visualizer import RetailVisualizer
 from .analysis_manager import RetailAnalysisManager

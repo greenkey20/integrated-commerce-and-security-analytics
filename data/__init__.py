@@ -31,7 +31,7 @@ def get_data_splitter():
     return DataSplitter
 
 def get_data_processor():
-    from data.processors.data_processor import DataProcessor
+    from data.processors.segmentation_data_processor import DataProcessor
     return DataProcessor
 
 # 편의 함수들

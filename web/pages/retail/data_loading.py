@@ -118,8 +118,9 @@ def show_data_loading_page():
             
             with col1:
                 st.markdown("**🚨 주의 필요:**")
-                high_missing = [(col, info['percentage']) for col, info in quality_report['missing_values'].items() 
-                               if info['percentage'] > 10]
+                high_missing = [(col, info['ratio'] * 100) for col, info in quality_report['missing_values'].items()
+                                if info['ratio'] * 100 > 10]
+
                 if high_missing:
                     for col, pct in high_missing:
                         st.warning(f"• {col}: {pct}% 결측값")
@@ -149,8 +150,8 @@ def show_data_loading_page():
                     {
                         '컬럼명': col,
                         '결측값 개수': info['count'],
-                        '결측률(%)': info['percentage'],
-                        '심각도': '높음' if info['percentage'] > 20 else '보통' if info['percentage'] > 5 else '낮음'
+                        '결측률(%)': info['ratio'] * 100,  # ratio를 percentage로 변환
+                        '심각도': '높음' if info['ratio'] > 0.20 else '보통' if info['ratio'] > 0.05 else '낮음'
                     }
                     for col, info in quality_report['missing_values'].items()
                 ]).sort_values('결측률(%)', ascending=False)
@@ -163,10 +164,10 @@ def show_data_loading_page():
                     outlier_df = pd.DataFrame([
                         {
                             '컬럼명': col,
-                            '이상치 개수': info['outlier_count'],
-                            '이상치 비율(%)': info['outlier_percentage'],
-                            '하한값': info['lower_bound'],
-                            '상한값': info['upper_bound']
+                            '이상치 개수': info['count'],
+                            '이상치 비율(%)': info['ratio'] * 100,
+                            '하한값': info.get('bounds', {}).get('lower', 'N/A'),
+                            '상한값': info.get('bounds', {}).get('upper', 'N/A')
                         }
                         for col, info in quality_report['outliers'].items()
                     ]).sort_values('이상치 비율(%)', ascending=False)

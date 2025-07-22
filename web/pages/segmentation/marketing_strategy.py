@@ -8,7 +8,7 @@ import streamlit as st
 import pandas as pd
 import numpy as np
 import plotly.express as px
-from data.processors.data_processor import DataProcessor
+from data.processors.segmentation_data_processor import DataProcessor
 from core.segmentation.clustering import ClusterAnalyzer
 
 

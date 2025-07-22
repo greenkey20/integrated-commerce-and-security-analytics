@@ -7,7 +7,7 @@
 import streamlit as st
 import pandas as pd
 import plotly.express as px
-from data.processors.data_processor import DataProcessor
+from data.processors.segmentation_data_processor import DataProcessor
 
 
 def show_exploratory_analysis_page():

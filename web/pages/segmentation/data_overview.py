@@ -1,7 +1,7 @@
 """
 고객 데이터 개요 페이지 - 완전 작동 버전
 
-새로운 데이터 계층(data/processors/data_processor.py)을 활용하여
+새로운 데이터 계층(data/processors/segmentation_data_processor.py)을 활용하여
 고품질 데이터 개요 및 분석 기능을 제공
 """
 
@@ -17,7 +17,7 @@ def get_data_processor():
     """데이터 프로세서 초기화 - 안전한 폴백 메커니즘"""
     try:
         # 새로운 데이터 계층 사용
-        from data.processors.data_processor import DataProcessor
+        from data.processors.segmentation_data_processor import DataProcessor
         processor = DataProcessor()
         return processor, 'new_data_layer'
     except ImportError as e:

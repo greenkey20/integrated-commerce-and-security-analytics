@@ -6,12 +6,11 @@ Online Retail 특성 공학 페이지
 
 import streamlit as st
 import pandas as pd
-import numpy as np
 import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
-from core.retail.retail_feature_engineer import RetailFeatureEngineer
+from data.processors.retail_feature_engineer import RetailFeatureEngineer
 from core.retail.visualizer import RetailVisualizer
 import warnings
 

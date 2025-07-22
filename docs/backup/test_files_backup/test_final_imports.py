@@ -71,7 +71,7 @@ def test_data_loading():
     print("-" * 30)
     
     try:
-        from data.processors.data_processor import DataProcessor
+        from data.processors.segmentation_data_processor import DataProcessor
         
         processor = DataProcessor()
         data = processor.load_data()
