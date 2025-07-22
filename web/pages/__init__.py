@@ -6,13 +6,13 @@
 """
 
 # 보안 분석 페이지 (임시 비활성화 - Phase 1-2 완료 후 재활성화)
-# try:
-#     from .security import show_security_analysis_page
-# except ImportError:
-#     # 보안 모듈이 없는 경우 None으로 설정
-#     show_security_analysis_page = None
+try:
+    from .security import show_security_analysis_page
+except ImportError:
+    # 보안 모듈이 없는 경우 None으로 설정
+    show_security_analysis_page = None
 
-show_security_analysis_page = None  # 임시 완전 비활성화
+# show_security_analysis_page = None  # 임시 완전 비활성화
 
 # 리테일 분석 페이지  
 try:

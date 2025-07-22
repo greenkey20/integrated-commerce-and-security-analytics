@@ -33,8 +33,9 @@ from web.pages.segmentation.marketing_strategy import show_marketing_strategy_pa
 from web.pages.retail.analysis import show_retail_analysis_page
 
 # 보안 페이지는 web.pages로부터 import (임시 비활성화 상태)
-from web.pages import show_security_analysis_page
-
+# from web.pages import show_security_analysis_page
+# 다음으로 수정:
+from web.pages.security.security_analysis_page import show_security_analysis_page
 
 def initialize_app():
     """애플리케이션 초기 설정"""

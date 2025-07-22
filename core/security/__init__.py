@@ -37,9 +37,18 @@ from .attack_detector import (
     evaluate_attack_detection
 )
 
-# ❌ detection_engine - 복잡성으로 인해 임시 비활성화
-# 복잡한 detection_engine.py는 detection_engine_backup.py로 백업됨
-DETECTION_ENGINE_AVAILABLE = False
+# ✅ detection_engine - 고도화된 통합 탐지 엔진 복원 완료
+from .detection_engine import (
+    UnifiedDetectionEngine,
+    RealTimeSecurityMonitor,
+    TrafficSimulator as EnhancedTrafficSimulator,
+    PerformanceEvaluator as EnhancedPerformanceEvaluator,
+    create_api_log_detector,
+    create_network_traffic_detector,
+    create_security_monitor
+)
+
+DETECTION_ENGINE_AVAILABLE = True
 
 __all__ = [
     # 데이터 로딩 (✅ 복원 완료)
@@ -54,17 +63,26 @@ __all__ = [
     'check_tensorflow_availability',
     'install_tensorflow',
 
-    # 실시간 공격 탐지 (✅ 복원 완료)
+    # 기본 공격 탐지 (호환성 유지)
     'RealTimeAttackDetector',
-    'TrafficSimulator',
-    'PerformanceEvaluator',
+    'TrafficSimulator',          # 기본 버전
+    'PerformanceEvaluator',      # 기본 버전
     'AlertManager',
     'DetectionOrchestrator',
     'create_detection_system',
     'run_quick_simulation',
-    'evaluate_attack_detection'
+    'evaluate_attack_detection',
+
+    # 🆕 통합 탐지 엔진 (고도화 버전 - 권장)
+    'UnifiedDetectionEngine',
+    'RealTimeSecurityMonitor',
+    'EnhancedTrafficSimulator',   # 고도화 버전
+    'EnhancedPerformanceEvaluator', # 고도화 버전
+    'create_api_log_detector',
+    'create_network_traffic_detector',
+    'create_security_monitor'
 ]
 
 __version__ = "1.0.0"
 __author__ = "Customer Segmentation Project"
-__description__ = "CICIDS2017 네트워크 이상 탐지 모듈 (보안 기능 복원 완료)"
+__description__ = "CICIDS2017 네트워크 이상 탐지 모듈 (통합 탐지 엔진 포함)"
