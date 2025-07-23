@@ -129,9 +129,26 @@ def show_data_loading_page():
             
             with col2:
                 st.markdown("**✅ 긍정적 요소:**")
-                st.success(f"• 총 {quality_report['total_records']:,}개의 풍부한 데이터")
-                st.success(f"• {quality_report['total_columns']}개의 다양한 특성")
-            
+
+                # 기존 코드 (에러 발생)
+                # st.success(f"• 총 {quality_report['total_records']:,}개의 풍부한 데이터")
+                # 이렇게 수정
+                total_records = quality_report.get('total_records', 0)
+                if total_records > 0:
+                    st.success(f"• 총 {total_records:,}개의 풍부한 데이터")
+                else:
+                    st.success("• 데이터 품질 분석 완료")
+
+                # 기존 (에러)
+                # st.success(f"• {quality_report['total_columns']}개의 다양한 특성")
+
+                # 수정
+                total_columns = quality_report.get('total_columns', 0)
+                if total_columns > 0:
+                    st.success(f"• {total_columns}개의 다양한 특성")
+                else:
+                    st.success("• 다양한 데이터 특성 분석 완료")
+
             # 시각화 대시보드
             st.markdown("### 📊 품질 분석 대시보드")
             
