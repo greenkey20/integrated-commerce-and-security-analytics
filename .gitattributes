@@ -1,2 +1,20 @@
 *.csv filter=lfs diff=lfs merge=lfs -text
 data/cicids2017/* filter=lfs diff=lfs merge=lfs -text
+
+# 텍스트 파일은 항상 LF로 저장소에 저장 (Git의 표준)
+*.py text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+*.sh text eol=lf
+*.json text eol=lf
+*.css text eol=lf
+*.html text eol=lf
+*.js text eol=lf
+# 기타 텍스트 기반 파일 확장자 추가
+
+# 바이너리 파일은 Git이 건드리지 않도록 (예: 이미지, 모델 파일)
+*.png binary
+*.jpg binary
+*.h5 binary
+*.keras binary
+*.pt binary
