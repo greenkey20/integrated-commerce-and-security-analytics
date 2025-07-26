@@ -294,30 +294,20 @@ def route_to_page(menu):
 
 def show_footer():
     """푸터 정보 표시"""
-    st.markdown("---")
-    st.markdown(f"""
-    **📋 애플리케이션 정보**
-    
-    **개발 정보:** 이 애플리케이션은 K-means 클러스터링을 활용한 고객 세분화 분석 도구입니다.  
-    **데이터:** Mall Customer Segmentation Dataset & Online Retail Dataset  
-    **기술 스택:** Python, Streamlit, Scikit-learn, TensorFlow, Plotly, CICIDS2017
-    **버전:** {AppConfig.VERSION}
-    **구조:** 모듈화된 페이지 기반 아키텍처
-    
-    **🎆 새로운 기능:**
-    - **"혼공머신" 연계 학습**: 선형회귀 알고리즘 실무 적용
-    - **대용량 데이터 처리**: 50만+ 거래 데이터 분석 경험
-    - **ADP 실기 대비**: 특성 공학, groupby/agg 활용
-    - **단계별 학습**: 데이터 로딩부터 모델 평가까지
-    - **네트워크 보안 분석**: CICIDS2017 데이터셋 활용 이상 탐지
-    - **하이브리드 딥러닝**: MLP + CNN 결합 모델로 실시간 보안 탐지
-    
-    **🏗️ 모듈 구조:**
-    - `config/`: 전역 설정 관리
-    - `core/`: 핵심 비즈니스 로직 (데이터 처리, 클러스터링, 딥러닝, 리테일 분석)
-    - `utils/`: 유틸리티 함수 (폰트 관리 등)
-    - `app_modules/`: 각 페이지별 UI 로직
-    """)
+    st.markdown("""
+    <hr style="margin-top:2em;margin-bottom:1em;">
+    <div style="text-align:center; color:gray; font-size:0.95em;">
+        <b>Integrated Commerce & Security Analytics</b> &nbsp;|&nbsp; 
+        <a href="https://github.com/your-repo" target="_blank">GitHub</a> &nbsp;|&nbsp; 
+        <a href="mailto:contact@yourdomain.com">Contact</a>
+        <br>
+        <span>
+            데이터: Mall Customer, Online Retail, CICIDS2017<br>
+            기술: Python, Streamlit, Scikit-learn, TensorFlow, Plotly<br>
+            버전: {ver} &nbsp;|&nbsp; © 2025 Eunyoung KANG. All rights reserved.
+        </span>
+    </div>
+    """.format(ver=AppConfig.VERSION), unsafe_allow_html=True)
 
 
 def main():
