@@ -46,7 +46,7 @@ class RetailModelTrainer:
         # 타겟 변수 분리
         y = df[target_column].copy()
         
-        # 모델링에 사용할 특성 선택
+        # 모델링에 사용할 특성 선택 (문자열 컬럼 제거)
         exclude_cols = [
             target_column, 'customer_value_category', 'monthly_avg_amount',
             'first_purchase', 'last_purchase', 'customer_segment'
@@ -55,15 +55,55 @@ class RetailModelTrainer:
         feature_cols = [col for col in df.columns if col not in exclude_cols]
         X = df[feature_cols].copy()
         
-        # 범주형 변수 인코딩
-        categorical_cols = X.select_dtypes(include=['object']).columns
+        # 1단계: 명시적 object/category 컬럼 제거
+        categorical_cols = X.select_dtypes(include=['object', 'category']).columns
         if len(categorical_cols) > 0:
-            print(f"   범주형 변수 인코딩: {list(categorical_cols)}")
-            X = pd.get_dummies(X, columns=categorical_cols, prefix=categorical_cols)
+            print(f"   ⚠️  범주형 컬럼 제거: {list(categorical_cols)}")
+            X = X.drop(columns=categorical_cols)
         
-        # 무한값 및 결측값 처리
+        # 2단계: 각 컬럼을 실제로 숫자 변환 시도해서 안전한 컬럼만 남기기
+        safe_columns = []
+        removed_columns = []
+        
+        for col in X.columns:
+            try:
+                # 샘플 데이터로 숫자 변환 테스트
+                sample_data = X[col].dropna().head(100)  # 처음 100개 샘플
+                
+                # 모든 값이 숫자로 변환 가능한지 체크
+                test_converted = pd.to_numeric(sample_data, errors='coerce')
+                
+                # NaN이 생겼다면 문자열이 섞여있음
+                if test_converted.isnull().sum() == 0 or len(sample_data) == 0:
+                    # 전체 컬럼에 대해서도 변환 시도
+                    X[col] = pd.to_numeric(X[col], errors='coerce')
+                    safe_columns.append(col)
+                else:
+                    removed_columns.append(col)
+                    print(f"     ⚠️  {col}: 문자열 데이터 감지됨 (예: {sample_data.iloc[0] if len(sample_data) > 0 else 'N/A'})")
+                    
+            except Exception as e:
+                removed_columns.append(col)
+                print(f"     ⚠️  {col}: 변환 실패 ({str(e)[:50]})")
+        
+        # 안전한 컬럼만 남기기
+        X = X[safe_columns]
+        
+        print(f"   ✅ 안전한 숫자형 컬럼: {len(safe_columns)}개")
+        if removed_columns:
+            print(f"   ❌ 제거된 컬럼: {removed_columns}")
+        
+        # 3단계: 무한값 및 결측값 처리
         X = X.replace([np.inf, -np.inf], np.nan)
-        X = X.fillna(X.median())
+        
+        # 숫자형 컬럼은 중앙값으로 채우기
+        for col in X.columns:
+            if X[col].isnull().any():
+                median_val = X[col].median()
+                if pd.isna(median_val):  # 중앙값도 NaN인 경우
+                    X[col] = X[col].fillna(0)
+                else:
+                    X[col] = X[col].fillna(median_val)
         
         # 특성명 저장
         self.feature_names = X.columns.tolist()
@@ -296,7 +336,13 @@ class RetailModelTrainer:
         X = customer_data[self.feature_names].copy()
         
         # 결측값 처리
-        X = X.fillna(X.median())
+        for col in X.columns:
+            if X[col].isnull().any():
+                median_val = X[col].median()
+                if pd.isna(median_val):
+                    X[col] = X[col].fillna(0)
+                else:
+                    X[col] = X[col].fillna(median_val)
         
         # 정규화 적용
         if self.scaler is not None:

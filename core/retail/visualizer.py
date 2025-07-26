@@ -31,49 +31,86 @@ class RetailVisualizer:
         )
         
         # 결측값 분포
-        missing_data = quality_report['missing_values']
-        cols = list(missing_data.keys())
-        missing_pcts = [missing_data[col]['percentage'] for col in cols]
-        
-        fig.add_trace(
-            go.Bar(x=cols, y=missing_pcts, name="결측값 %", marker_color='lightcoral'),
-            row=1, col=1
-        )
+        missing_data = quality_report.get('missing_values', {})
+        if missing_data:
+            cols = list(missing_data.keys())
+            # ratio를 percentage로 변환 (0.25 -> 25%)
+            missing_pcts = [missing_data[col].get('ratio', 0) * 100 if isinstance(missing_data[col], dict) else 0 for col in cols]
+            
+            fig.add_trace(
+                go.Bar(x=cols, y=missing_pcts, name="결측값 %", marker_color='lightcoral'),
+                row=1, col=1
+            )
+        else:
+            # 데이터가 없을 때 기본 메시지
+            fig.add_annotation(
+                text="결측값 데이터 없음",
+                xref="x", yref="y",
+                x=0.5, y=0.5, xanchor='center', yanchor='middle',
+                row=1, col=1, showarrow=False
+            )
         
         # 데이터 타입 분포
-        type_counts = {}
-        for col, info in quality_report['data_types'].items():
-            dtype = info['current_type']
-            type_counts[dtype] = type_counts.get(dtype, 0) + 1
-        
-        fig.add_trace(
-            go.Pie(labels=list(type_counts.keys()), values=list(type_counts.values()), name="데이터 타입"),
-            row=1, col=2
-        )
+        data_types = quality_report.get('data_types', {})
+        if data_types:
+            type_counts = {}
+            for col, info in data_types.items():
+                if isinstance(info, dict) and 'current_type' in info:
+                    dtype = info['current_type']
+                    type_counts[dtype] = type_counts.get(dtype, 0) + 1
+            
+            if type_counts:
+                fig.add_trace(
+                    go.Pie(labels=list(type_counts.keys()), values=list(type_counts.values()), name="데이터 타입"),
+                    row=1, col=2
+                )
+            else:
+                fig.add_annotation(
+                    text="데이터 타입 정보 없음",
+                    xref="x2", yref="y2",
+                    x=0.5, y=0.5, xanchor='center', yanchor='middle',
+                    row=1, col=2, showarrow=False
+                )
+        else:
+            fig.add_annotation(
+                text="데이터 타입 정보 없음",
+                xref="x2", yref="y2",
+                x=0.5, y=0.5, xanchor='center', yanchor='middle',
+                row=1, col=2, showarrow=False
+            )
         
         # 이상치 현황
-        outlier_data = quality_report['outliers']
+        outlier_data = quality_report.get('outliers', {})
         if outlier_data:
             outlier_cols = list(outlier_data.keys())
-            outlier_pcts = [outlier_data[col]['outlier_percentage'] for col in outlier_cols]
+            # ratio를 percentage로 변환 (0.05 -> 5%)
+            outlier_pcts = [outlier_data[col].get('ratio', 0) * 100 if isinstance(outlier_data[col], dict) else 0 for col in outlier_cols]
             
             fig.add_trace(
                 go.Bar(x=outlier_cols, y=outlier_pcts, name="이상치 %", marker_color='orange'),
                 row=2, col=1
             )
+        else:
+            fig.add_annotation(
+                text="이상치 데이터 없음",
+                xref="x3", yref="y3",
+                x=0.5, y=0.5, xanchor='center', yanchor='middle',
+                row=2, col=1, showarrow=False
+            )
         
         # 메모리 사용량
+        memory_usage = quality_report.get('basic_info', {}).get('memory_usage_mb', 100)  # 기본값 100MB
         fig.add_trace(
             go.Indicator(
                 mode="gauge+number",
-                value=quality_report['memory_usage_mb'],
+                value=memory_usage,
                 title={'text': "메모리 (MB)"},
-                gauge={'axis': {'range': [None, quality_report['memory_usage_mb'] * 1.5]},
+                gauge={'axis': {'range': [None, memory_usage * 1.5]},
                        'bar': {'color': "darkblue"},
-                       'steps': [{'range': [0, quality_report['memory_usage_mb'] * 0.5], 'color': "lightgray"},
-                                {'range': [quality_report['memory_usage_mb'] * 0.5, quality_report['memory_usage_mb']], 'color': "gray"}],
+                       'steps': [{'range': [0, memory_usage * 0.5], 'color': "lightgray"},
+                                {'range': [memory_usage * 0.5, memory_usage], 'color': "gray"}],
                        'threshold': {'line': {'color': "red", 'width': 4},
-                                    'thickness': 0.75, 'value': quality_report['memory_usage_mb'] * 1.2}}
+                                    'thickness': 0.75, 'value': memory_usage * 1.2}}
             ),
             row=2, col=2
         )
@@ -90,27 +127,80 @@ class RetailVisualizer:
     def create_customer_distribution_plots(customer_features: pd.DataFrame) -> go.Figure:
         """고객 특성 분포 시각화"""
         
-        key_metrics = ['total_amount', 'frequency', 'recency_days', 'unique_products']
+        # 원본 메트릭과 대체 컴럼 매핑
+        metric_mapping = {
+            'total_amount': ['total_amount', 'monetary', 'total_spend'],
+            'frequency': ['frequency', 'purchase_frequency', 'unique_invoices', 'order_count', 'transaction_count'],
+            'recency_days': ['recency_days', 'recency', 'days_since_last_purchase'],
+            'unique_products': ['unique_products', 'product_count', 'unique_items', 'item_variety'],
+            # 추가 메트릭들
+            'avg_order_value': ['avg_order_value', 'average_order_value', 'aov'],
+            'monthly_avg': ['monthly_avg_amount', 'monthly_average', 'monthly_spending'],
+            'customer_lifetime': ['customer_lifetime_days', 'lifetime_days', 'customer_age_days'],
+            'purchase_diversity': ['purchase_diversity', 'product_diversity', 'category_count']
+        }
+        
+        # 실제 사용할 컴럼 찾기
+        available_metrics = {}
+        for metric_name, possible_cols in metric_mapping.items():
+            found_col = None
+            for col in possible_cols:
+                if col in customer_features.columns:
+                    found_col = col
+                    break
+            if found_col:
+                available_metrics[metric_name] = found_col
+        
+        # 매핑에 없는 숫자형 컴럼들도 추가 (상위 8개까지)
+        numeric_cols = customer_features.select_dtypes(include=['number']).columns
+        for col in numeric_cols:
+            if col not in [v for v in available_metrics.values()]:
+                if len(available_metrics) < 8:  # 최대 8개까지
+                    available_metrics[col] = col
+        
+        # 최소 2개 이상의 메트릭이 있어야 시각화 생성
+        if len(available_metrics) < 2:
+            return go.Figure().add_annotation(
+                text=f"고객 특성 데이터가 부족합니다.\n사용 가능한 컴럼: {list(customer_features.columns)[:10]}",
+                x=0.5, y=0.5, xanchor='center', yanchor='middle', showarrow=False
+            )
+        
+        # 최대 4개만 사용 (2x2 그리드)
+        metrics_list = list(available_metrics.items())[:4]
+        
+        # 그리드 크기 결정
+        num_metrics = len(metrics_list)
+        if num_metrics == 1:
+            rows, cols = 1, 1
+        elif num_metrics == 2:
+            rows, cols = 1, 2
+        elif num_metrics == 3:
+            rows, cols = 2, 2  # 3개일 때도 2x2 그리드 사용
+        else:
+            rows, cols = 2, 2
         
         fig = make_subplots(
-            rows=2, cols=2,
-            subplot_titles=[f'{metric} 분포' for metric in key_metrics]
+            rows=rows, cols=cols,
+            subplot_titles=[f'{metric_name} 분포 ({col_name})' if metric_name != col_name else f'{metric_name} 분포' 
+                          for metric_name, col_name in metrics_list]
         )
         
-        for i, metric in enumerate(key_metrics):
-            row = i // 2 + 1
-            col = i % 2 + 1
+        for i, (metric_name, col_name) in enumerate(metrics_list):
+            if num_metrics <= 2:
+                row, col = 1, i + 1
+            else:
+                row = i // 2 + 1
+                col = i % 2 + 1
             
-            if metric in customer_features.columns:
-                fig.add_trace(
-                    go.Histogram(x=customer_features[metric], name=metric, nbinsx=30),
-                    row=row, col=col
-                )
+            fig.add_trace(
+                go.Histogram(x=customer_features[col_name], name=f'{metric_name}', nbinsx=30),
+                row=row, col=col
+            )
         
         fig.update_layout(
             title_text="👥 고객 특성 분포 분석",
             showlegend=False,
-            height=600
+            height=600 if num_metrics > 2 else 400
         )
         
         return fig

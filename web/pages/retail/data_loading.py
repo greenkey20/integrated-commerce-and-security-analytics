@@ -132,8 +132,8 @@ def show_data_loading_page():
 
                 # 기존 코드 (에러 발생)
                 # st.success(f"• 총 {quality_report['total_records']:,}개의 풍부한 데이터")
-                # 이렇게 수정
-                total_records = quality_report.get('total_records', 0)
+                # 수정된 코드: basic_info 경로로 접근
+                total_records = quality_report.get('basic_info', {}).get('total_records', 0)
                 if total_records > 0:
                     st.success(f"• 총 {total_records:,}개의 풍부한 데이터")
                 else:
@@ -141,9 +141,8 @@ def show_data_loading_page():
 
                 # 기존 (에러)
                 # st.success(f"• {quality_report['total_columns']}개의 다양한 특성")
-
-                # 수정
-                total_columns = quality_report.get('total_columns', 0)
+                # 수정된 코드: basic_info 경로로 접근
+                total_columns = quality_report.get('basic_info', {}).get('total_columns', 0)
                 if total_columns > 0:
                     st.success(f"• {total_columns}개의 다양한 특성")
                 else:
@@ -193,7 +192,16 @@ def show_data_loading_page():
             
             # 다음 단계 안내
             st.markdown("---")
-            st.info("💡 품질 분석이 완료되었습니다. 다음 단계인 '데이터 정제 & 전처리'로 진행해주세요.")
+            col1, col2 = st.columns([2, 1])
+            
+            with col1:
+                st.info("💡 품질 분석이 완료되었습니다. 다음 단계인 '데이터 정제 & 전처리'로 진행해주세요.")
+            
+            with col2:
+                if st.button("🚀 다음 단계로 진행", type="primary"):
+                    st.session_state.analysis_step = "2️⃣ 데이터 정제 & 전처리"
+                    st.success("🎉 데이터 정제 단계로 이동합니다!")
+                    st.rerun()
     
     else:
         st.info("💡 '데이터 로딩 시작' 버튼을 클릭하여 시작해주세요.")
