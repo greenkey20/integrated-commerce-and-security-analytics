@@ -55,7 +55,7 @@ def show_security_analysis_page():
         - **최신 공격 패턴**: 2017년 당시 최신 공격 기법들 포함
         - **280만+ 실제 트래픽**: 25명의 실제 사용자 행동 패턴 기반
         
-        ### 🧠 기존 고객 분석과의 차이점
+        ### 🌱 기존 고객 분석과의 차이점
         
         **고객 세분화 vs 보안 탐지:**
         - 고객 분석: 비즈니스 성장을 위한 **기회 발견**
@@ -73,7 +73,7 @@ def show_security_analysis_page():
             "📥 데이터 다운로드 및 로드",
             "🔍 네트워크 트래픽 탐색적 분석", 
             "⚡ 공격 패턴 심화 분석",
-            "🧠 딥러닝 이상 탐지 모델",
+            "🌱 딥러닝 이상 탐지 모델",
             "📊 실시간 예측 테스트",
             "🎯 종합 성능 평가"
         ]
@@ -85,7 +85,7 @@ def show_security_analysis_page():
         show_exploratory_analysis_section()
     elif analysis_menu == "⚡ 공격 패턴 심화 분석":
         show_attack_pattern_analysis()
-    elif analysis_menu == "🧠 딥러닝 이상 탐지 모델":
+    elif analysis_menu == "🌱 딥러닝 이상 탐지 모델":
         show_deep_learning_detection()
     elif analysis_menu == "📊 실시간 예측 테스트":
         show_real_time_prediction()
@@ -98,7 +98,7 @@ def show_data_download_section():
     st.subheader("📥 CICIDS2017 데이터셋 준비")
     
     # 데이터 로더 초기화
-    data_loader = CICIDSDataLoader()
+    data_loader = SecurityDataLoader()
     
     # 세션 상태 디버깅
     with st.expander("🔧 현재 세션 상태 디버깅"):
@@ -146,7 +146,7 @@ def show_data_download_section():
     
     if st.button("🎆 향상된 공격 데이터 60% 즉시 생성", key="priority_emergency_button"):
         with st.spinner("향상된 샘플 데이터 생성 중..."):
-            enhanced_data = data_loader.generate_enhanced_sample_data()
+            enhanced_data = data_loader.generate_sample_data(total_samples=10000, attack_ratio=0.6)
             
             # 세션에 저장
             st.session_state.cicids_data = enhanced_data
@@ -215,7 +215,7 @@ def load_real_files(data_loader, file_paths):
             st.info("🔧 샘플 데이터를 대신 생성합니다...")
             
             # 폴백: 샘플 데이터 생성
-            enhanced_data = data_loader.generate_enhanced_sample_data()
+            enhanced_data = data_loader.generate_sample_data(total_samples=10000, attack_ratio=0.6)
             st.session_state.cicids_data = enhanced_data
             st.session_state.enhanced_data_generated = True
             
@@ -346,16 +346,31 @@ def show_feature_distribution(data):
 
 def display_feature_comparison(data, features):
     """특성별 정상 vs 공격 비교"""
+    n_features = len(features)
+    
+    # 동적 그리드 계산
+    if n_features <= 4:
+        rows, cols = 2, 2
+    elif n_features <= 6:
+        rows, cols = 2, 3
+    elif n_features <= 9:
+        rows, cols = 3, 3
+    else:
+        rows, cols = 4, 3  # 최대 12개까지
+    
+    # 실제 표시할 특성 수 (그리드 크기에 맞춤)
+    max_features = min(n_features, rows * cols)
+    display_features = features[:max_features]
+    
     fig = make_subplots(
-        rows=2, cols=2,
-        subplot_titles=features[:4],
-        specs=[[{"secondary_y": False}, {"secondary_y": False}],
-               [{"secondary_y": False}, {"secondary_y": False}]]
+        rows=rows, cols=cols,
+        subplot_titles=display_features,
+        specs=[[{"secondary_y": False} for _ in range(cols)] for _ in range(rows)]
     )
     
-    for i, feature in enumerate(features[:4]):
-        row = i // 2 + 1
-        col = i % 2 + 1
+    for i, feature in enumerate(display_features):
+        row = i // cols + 1
+        col = i % cols + 1
         
         # 정상 트래픽 분포
         normal_data_subset = data[data['Label'] == 'BENIGN'][feature]
@@ -366,17 +381,26 @@ def display_feature_comparison(data, features):
             name=f'{feature} - 정상',
             row=row, col=col,
             opacity=0.7,
-            nbinsx=50
+            nbinsx=50,
+            showlegend=(i == 0)  # 첫 번째만 범례 표시
         )
         fig.add_histogram(
             x=attack_data_subset,
             name=f'{feature} - 공격', 
             row=row, col=col,
             opacity=0.7,
-            nbinsx=50
+            nbinsx=50,
+            showlegend=(i == 0)  # 첫 번째만 범례 표시
         )
     
-    fig.update_layout(height=600, title_text="정상 vs 공격 트래픽 특성 분포")
+    # 높이를 동적으로 조정
+    height = max(400, rows * 250)
+    fig.update_layout(height=height, title_text="정상 vs 공격 트래픽 특성 분포")
+    
+    # 선택된 특성이 표시 가능한 수보다 많은 경우 안내
+    if n_features > max_features:
+        st.warning(f"⚠️ 선택된 특성 {n_features}개 중 처음 {max_features}개만 표시됩니다. 더 많은 특성을 보려면 여러 번에 나누어 선택해주세요.")
+    
     st.plotly_chart(fig, use_container_width=True)
 
 
@@ -450,8 +474,8 @@ def show_attack_pattern_analysis():
         st.warning("⚠️ 먼저 데이터를 로드해주세요.")
         
         if st.button("🎆 즉시 훈련용 데이터 생성", key="instant_data_generation"):
-            data_loader = CICIDSDataLoader()
-            enhanced_data = data_loader.generate_enhanced_sample_data()
+            data_loader = SecurityDataLoader()
+            enhanced_data = data_loader.generate_sample_data(total_samples=10000, attack_ratio=0.6)
             st.session_state.cicids_data = enhanced_data
             st.session_state.enhanced_data_generated = True
             st.rerun()
@@ -466,8 +490,8 @@ def show_attack_pattern_analysis():
     if attack_ratio < 5:
         st.error(f"❌ 공격 데이터 비율이 매우 낮습니다 ({attack_ratio:.1f}%)")
         if st.button("🎆 즉시 공격 데이터 60% 생성", key="fix_attack_data"):
-            data_loader = CICIDSDataLoader()
-            enhanced_data = data_loader.generate_enhanced_sample_data()
+            data_loader = SecurityDataLoader()
+            enhanced_data = data_loader.generate_sample_data(total_samples=10000, attack_ratio=0.6)
             st.session_state.cicids_data = enhanced_data
             st.session_state.enhanced_data_generated = True
             st.rerun()
@@ -594,7 +618,7 @@ def show_temporal_pattern_analysis(attack_data, attack_title):
 
 def show_deep_learning_detection():
     """딥러닝 이상 탐지 모델"""
-    st.subheader("🧠 딥러닝 기반 네트워크 이상 탐지")
+    st.subheader("🌱 딥러닝 기반 네트워크 이상 탐지")
     
     # TensorFlow 사용 가능 여부 확인
     tf_available, tf_version = check_tensorflow_availability()

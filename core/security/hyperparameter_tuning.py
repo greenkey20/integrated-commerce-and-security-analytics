@@ -55,7 +55,7 @@ class SecurityHyperparameterTuner:
     def tune_mlp_hyperparameters(self, X_train, y_train, X_val, y_val):
         """MLP 모델 하이퍼파라미터 튜닝"""
         
-        print("\n🧠 MLP 하이퍼파라미터 튜닝 시작...")
+        print("\n🌱 MLP 하이퍼파라미터 튜닝 시작...")
         
         # MLP 하이퍼파라미터 그리드
         mlp_param_grid = {
