@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 """
-🧠 Customer Segmentation - 통합 모델 훈련 스크립트
+🌱 Customer Segmentation - 통합 모델 훈련 스크립트
 모든 머신러닝 모델을 훈련하고 저장하는 통합 스크립트
 """
 
@@ -143,7 +143,7 @@ def train_deep_learning_model(data, n_clusters=5):
         from sklearn.cluster import KMeans
         import joblib
         
-        logger.info("🧠 딥러닝 모델 훈련 시작...")
+        logger.info("🌱 딥러닝 모델 훈련 시작...")
         
         # 데이터 준비
         features = data[["Age", "Annual Income (k$)", "Spending Score (1-100)"]]
@@ -275,7 +275,7 @@ def main():
     
     args = parser.parse_args()
     
-    print("🧠 Customer Segmentation 모델 훈련 시작")
+    print("🌱 Customer Segmentation 모델 훈련 시작")
     print(f"📊 훈련 모드: {args.mode}")
     print(f"🎯 클러스터 개수: {args.clusters}")
     print("-" * 50)

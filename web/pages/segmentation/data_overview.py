@@ -375,7 +375,7 @@ def show_correlation_analysis(data):
 
 def show_advanced_analysis(data):
     """고급 분석 기능"""
-    st.subheader("🧠 고급 분석")
+    st.subheader("🌱 고급 분석")
 
     # 특성 엔지니어링 미리보기
     with st.expander("🔧 특성 엔지니어링 미리보기"):

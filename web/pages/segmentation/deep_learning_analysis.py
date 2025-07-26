@@ -26,7 +26,7 @@ if TENSORFLOW_AVAILABLE:
 
 def show_deep_learning_analysis_page():
     """딥러닝 분석 페이지를 표시하는 함수"""
-    st.header("🧠 딥러닝을 활용한 고객 분석")
+    st.header("🌱 딥러닝을 활용한 고객 분석")
     
     # 딥러닝 메뉴에 진입할 때마다 Keras 세션을 초기화
     if TENSORFLOW_AVAILABLE:
@@ -64,7 +64,7 @@ def show_deep_learning_analysis_page():
         마치 숙련된 영업사원이 고객을 보자마자 어떤 유형인지 판단하는 것처럼,
         딥러닝 모델은 새로운 고객의 특성을 입력받아 즉시 세그먼트를 예측할 수 있습니다.
         
-        ### 🧠 딥러닝이 전통적 방법보다 나은 점
+        ### 🌱 딥러닝이 전통적 방법보다 나은 점
         
         **비선형 패턴 학습:**
         - 전통적 방법: 변수들 간의 **선형적 관계**만 포착
@@ -126,7 +126,7 @@ def show_deep_learning_analysis_page():
         st.plotly_chart(fig, use_container_width=True)
 
     # 딥러닝 모델 옵션 선택
-    st.subheader("🧠 2단계: 딥러닝 모델 선택")
+    st.subheader("🌱 2단계: 딥러닝 모델 선택")
 
     model_type = st.selectbox(
         "어떤 딥러닝 접근법을 사용하시겠습니까?",
@@ -281,7 +281,7 @@ def show_deep_learning_analysis_page():
         - 생애 가치 예측 모델링
         """)
 
-    st.success("🧠 딥러닝을 통한 고객 분석이 완료되었습니다!")
+    st.success("🌱 딥러닝을 통한 고객 분석이 완료되었습니다!")
 
 
 def _initialize_model_session_state():
