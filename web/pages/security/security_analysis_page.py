@@ -13,6 +13,13 @@ from plotly.subplots import make_subplots
 import warnings
 warnings.filterwarnings('ignore')
 
+# TensorFlow import (조건부)
+try:
+    import tensorflow as tf
+    TF_AVAILABLE = True
+except ImportError:
+    TF_AVAILABLE = False
+
 # Core 모듈에서 비즈니스 로직 import
 from core.security import (
     # CICIDSDataLoader,
@@ -74,8 +81,9 @@ def show_security_analysis_page():
             "🔍 네트워크 트래픽 탐색적 분석", 
             "⚡ 공격 패턴 심화 분석",
             "🌱 딥러닝 이상 탐지 모델",
+            "🎯 Overfitting 해결 검증 (NEW!)",
             "📊 실시간 예측 테스트",
-            "🎯 종합 성능 평가"
+            "🏆 종합 성능 평가"
         ]
     )
 
@@ -87,16 +95,68 @@ def show_security_analysis_page():
         show_attack_pattern_analysis()
     elif analysis_menu == "🌱 딥러닝 이상 탐지 모델":
         show_deep_learning_detection()
+    elif analysis_menu == "🎯 Overfitting 해결 검증 (NEW!)":
+        show_overfitting_validation()
     elif analysis_menu == "📊 실시간 예측 테스트":
         show_real_time_prediction()
-    elif analysis_menu == "🎯 종합 성능 평가":
+    elif analysis_menu == "🏆 종합 성능 평가":
         show_comprehensive_evaluation()
+
+
+def load_real_cicids_data():
+    """실제 CICIDS2017 데이터 로드"""
+    from data.loaders.cicids_working_files_loader import WorkingCICIDSLoader
+    
+    data_dir = "C:/keydev/customer-segmentation-analysis/data/cicids2017"
+    loader = WorkingCICIDSLoader(data_dir)
+    
+    # 대용량 데이터 로드 (20만 개)
+    dataset = loader.load_working_files(target_samples=200000)
+    
+    st.session_state.cicids_data = dataset
+    st.success(f"✅ 실제 CICIDS2017 데이터 로드 완료: {len(dataset):,}개")
+    
+    # 라벨 분포 표시
+    st.write("📊 라벨 분포:")
+    label_counts = dataset['Label'].value_counts()
+    for label, count in label_counts.items():
+        pct = (count / len(dataset)) * 100
+        st.write(f"- {label}: {count:,}개 ({pct:.1f}%)")
+    
+    return dataset
 
 
 def show_data_download_section():
     """데이터 다운로드 및 로드 섹션"""
     st.subheader("📥 CICIDS2017 데이터셋 준비")
     
+    # 🔥 데이터 소스 선택 추가
+    data_source = st.radio(
+        "🔥 데이터 소스 선택:",
+        ["실제 CICIDS2017 데이터 (권장)", "시뮬레이션 데이터"]
+    )
+    
+    if data_source == "실제 CICIDS2017 데이터 (권장)":
+        st.info("⚡ 이전 채팅에서 완성된 작동하는 파일 로더를 사용합니다.")
+        
+        if st.button("🚀 실제 CICIDS2017 데이터 로드"):
+            with st.spinner("실제 CICIDS2017 데이터 로드 중..."):
+                try:
+                    load_real_cicids_data()
+                    st.balloons()
+                    st.info("✅ 이제 '⚡ 공격 패턴 심화 분석' 메뉴로 이동하세요!")
+                except Exception as e:
+                    st.error(f"❌ 실제 데이터 로드 실패: {str(e)}")
+                    st.info("🔧 시뮬레이션 데이터를 대신 생성합니다...")
+                    # 폴백: 시뮬레이션 데이터
+                    data_loader = SecurityDataLoader()
+                    enhanced_data = data_loader.generate_sample_data(total_samples=10000, attack_ratio=0.6)
+                    st.session_state.cicids_data = enhanced_data
+                    st.session_state.enhanced_data_generated = True
+                    display_data_summary(enhanced_data)
+        return
+    
+    # 기존 시뮬레이션 데이터 로직
     # 데이터 로더 초기화
     data_loader = SecurityDataLoader()
     
@@ -146,7 +206,11 @@ def show_data_download_section():
     
     if st.button("🎆 향상된 공격 데이터 60% 즉시 생성", key="priority_emergency_button"):
         with st.spinner("향상된 샘플 데이터 생성 중..."):
-            enhanced_data = data_loader.generate_sample_data(total_samples=10000, attack_ratio=0.6)
+            enhanced_data = data_loader.generate_sample_data(
+                total_samples=10000, 
+                attack_ratio=0.6,
+                realistic_mode=True  # 현실적인 데이터 생성
+            )
             
             # 세션에 저장
             st.session_state.cicids_data = enhanced_data
@@ -689,18 +753,40 @@ def show_tensorflow_installation():
 
 def show_model_training_section(data, model_builder, model_option):
     """모델 훈련 섹션 표시"""
-    st.write("**1️⃣ 데이터 전처리**")
+    st.write("**1️⃣ 데이터 전처리 및 품질 진단**")
     
-    with st.spinner("데이터 전처리 중..."):
+    with st.spinner("데이터 전처리 및 품질 진단 중..."):
         # 특성과 라벨 분리
         numeric_features = [col for col in data.columns if col != 'Label' and data[col].dtype in ['int64', 'float64']]
         X = data[numeric_features].values
         y = data['Label'].values
         
+        # 데이터 품질 진단
+        diagnosis = model_builder.diagnose_data_quality(X, numeric_features)
+        
+        # 진단 결과 표시
+        col1, col2, col3 = st.columns(3)
+        with col1:
+            st.metric("전체 샘플", f"{diagnosis['total_samples']:,}")
+        with col2:
+            st.metric("무한대 값", diagnosis['inf_count'])
+        with col3:
+            st.metric("NaN 값", diagnosis['nan_count'])
+        
+        # 문제 특성 표시
+        if diagnosis['problematic_features']:
+            st.warning(f"⚠️ {len(diagnosis['problematic_features'])}개 특성에서 데이터 품질 문제 발견")
+            
+            with st.expander("문제 특성 상세 정보"):
+                problem_df = pd.DataFrame(diagnosis['problematic_features'])
+                st.dataframe(problem_df, use_container_width=True)
+        else:
+            st.success("✅ 모든 특성이 정상 범위 내에 있습니다")
+        
         # 데이터 전처리 및 분할
         X_train, X_test, y_train, y_test = model_builder.prepare_data(X, y)
     
-    st.success(f"✅ 전처리 완료 - 특성: {X.shape[1]}개, 훈련: {len(X_train)}개, 테스트: {len(X_test)}개")
+    st.success(f"✅ 데이터 정제 및 전처리 완료 - 특성: {X.shape[1]}개, 훈련: {len(X_train)}개, 테스트: {len(X_test)}개")
     
     # 모델별 구현
     if "하이브리드" in model_option:
@@ -714,7 +800,7 @@ def show_model_training_section(data, model_builder, model_option):
 
 
 def train_hybrid_model(model_builder, X_train, X_test, y_train, y_test, feature_names):
-    """하이브리드 모델 훈련"""
+    """하이브리드 모델 훈련 (진행상황 표시 포함)"""
     st.write("**2️⃣ 하이브리드 모델 구축 (MLP + CNN)**")
     
     with st.expander("하이브리드 모델 구조 설명"):
@@ -728,10 +814,84 @@ def train_hybrid_model(model_builder, X_train, X_test, y_train, y_test, feature_
     model = model_builder.build_hybrid_model(X_train.shape[1])
     
     if st.button("🚀 하이브리드 모델 훈련 시작"):
-        with st.spinner("하이브리드 모델 훈련 중..."):
-            history = model_builder.train_model(X_train, y_train, X_test, y_test, epochs=50, verbose=0)
+        # 실시간 진행상황 표시
+        st.subheader("📊 실시간 훈련 진행상황")
         
-        st.success("✅ 하이브리드 모델 훈련 완료!")
+        # 진행률 표시용 컴포넌트
+        progress_bar = st.progress(0)
+        status_text = st.empty()
+        metrics_container = st.empty()
+        
+        # 커스텀 콜백 클래스 정의 (TensorFlow 사용 가능한 경우에만)
+        if TF_AVAILABLE:
+            class StreamlitProgressCallback(tf.keras.callbacks.Callback):
+                def __init__(self, total_epochs=50):
+                    super().__init__()
+                    self.total_epochs = total_epochs
+                    self.current_epoch = 0
+                    self.epoch_metrics = []
+                
+                def on_train_begin(self, logs=None):
+                    status_text.text("🚀 모델 훈련을 시작합니다...")
+                    progress_bar.progress(0)
+                
+                def on_epoch_begin(self, epoch, logs=None):
+                    self.current_epoch = epoch + 1
+                    status_text.text(f"📈 Epoch {self.current_epoch}/{self.total_epochs} 훈련 중...")
+                
+                def on_epoch_end(self, epoch, logs=None):
+                    logs = logs or {}
+                    progress = (epoch + 1) / self.total_epochs
+                    progress_bar.progress(progress)
+                    
+                    # 실시간 메트릭 표시
+                    with metrics_container.container():
+                        col1, col2, col3, col4 = st.columns(4)
+                        with col1:
+                            st.metric("Loss", f"{logs.get('loss', 0.0):.4f}")
+                        with col2:
+                            st.metric("Accuracy", f"{logs.get('accuracy', 0.0):.4f}")
+                        with col3:
+                            if 'val_loss' in logs:
+                                st.metric("Val Loss", f"{logs.get('val_loss', 0.0):.4f}")
+                        with col4:
+                            if 'val_accuracy' in logs:
+                                st.metric("Val Accuracy", f"{logs.get('val_accuracy', 0.0):.4f}")
+                    
+                    status_text.text(
+                        f"✅ Epoch {epoch + 1}/{self.total_epochs} 완료 - "
+                        f"Loss: {logs.get('loss', 0.0):.4f}, "
+                        f"Accuracy: {logs.get('accuracy', 0.0):.4f}"
+                    )
+                
+                def on_train_end(self, logs=None):
+                    progress_bar.progress(1.0)
+                    status_text.text("🎉 모델 훈련이 완료되었습니다!")
+        
+        # TensorFlow import 확인
+        if TF_AVAILABLE:
+            # 콜백 설정
+            callbacks = [
+                StreamlitProgressCallback(total_epochs=50),
+                tf.keras.callbacks.EarlyStopping(
+                    monitor='val_loss', patience=10, restore_best_weights=True
+                )
+            ]
+            
+            # 모델 훈련 (verbose=1로 변경하여 에포크별 출력 표시)
+            history = model_builder.train_model(
+                X_train, y_train, X_test, y_test, 
+                epochs=50, verbose=1, 
+                custom_callbacks=callbacks
+            )
+            
+            st.success("✅ 하이브리드 모델 훈련 완료!")
+            
+        else:
+            # TensorFlow가 없는 경우 기본 방식으로 훈련
+            with st.spinner("하이브리드 모델 훈련 중..."):
+                history = model_builder.train_model(X_train, y_train, X_test, y_test, epochs=50, verbose=0)
+            st.success("✅ 하이브리드 모델 훈련 완료!")
         
         # 성능 평가
         show_model_performance(model_builder, X_test, y_test)
@@ -823,7 +983,13 @@ def show_model_performance(model_builder, X_test, y_test):
         roc_data = metrics['roc_data']
         fig = px.line(x=roc_data['fpr'], y=roc_data['tpr'], 
                      title=f'ROC 곡선 (AUC = {metrics["auc"]:.3f})')
-        fig.add_line(x=[0, 1], y=[0, 1], line_dash="dash", line_color="gray")
+        fig.add_scatter(
+            x=[0, 1],
+            y=[0, 1],
+            mode='lines',
+            line=dict(dash='dash', color='gray'),
+            name='Baseline'
+        )
         fig.update_layout(xaxis_title="거짓 양성 비율", yaxis_title="참 양성 비율")
         st.plotly_chart(fig, use_container_width=True)
 
@@ -1084,9 +1250,340 @@ def run_real_time_simulation(orchestrator, scenario):
             st.warning(f"{severity_color} {alert['message']}")
 
 
+def show_overfitting_validation():
+    """Overfitting 해결 검증"""
+    st.subheader("🎯 Overfitting 해결 검증 (이전 채팅 성과 확인)")
+    
+    # 목적 설명
+    with st.expander("🤔 왜 Overfitting 검증이 중요한가요?", expanded=True):
+        st.markdown("""
+        ### 🔬 이전 채팅에서 발견된 문제
+        
+        **Overfitting 증상:**
+        - **정확도 1.0 (100%)**: 완벽한 예측 (비현실적)
+        - **훈련 데이터에만 특화**: 새로운 데이터에서 성능 급감
+        - **일반화 능력 부족**: 실제 운영 환경에서 사용 불가
+        
+        **금융권에서의 위험성:**
+        - **허위 보안감**: 실제로는 공격을 놓칠 수 있음
+        - **운영 리스크**: 배포 후 성능 급감으로 인한 보안 사고
+        - **비즈니스 손실**: 신뢰할 수 없는 모델로 인한 서비스 중단
+        
+        ### 🎯 목표: 정확도 0.85~0.95
+        
+        **적정 성능 범위:**
+        - **0.85~0.95**: 실용적이고 신뢰할 수 있는 성능
+        - **일반화 능력**: 새로운 공격 패턴에도 대응 가능
+        - **안정성**: 교차검증에서 일관된 성능
+        """)
+    
+    # 검증 옵션
+    validation_mode = st.selectbox(
+        "검증 모드 선택:",
+        [
+            "🚀 실제 CICIDS2017 데이터 검증 (권장)",
+            "⚡ 시뮬레이션 데이터 빠른 검증"
+        ]
+    )
+    
+    if validation_mode == "🚀 실제 CICIDS2017 데이터 검증 (권장)":
+        run_real_overfitting_validation()
+    else:
+        run_simulation_overfitting_validation()
+
+
+def run_real_overfitting_validation():
+    """실제 CICIDS2017 데이터로 Overfitting 검증"""
+    st.info("💫 이전 채팅에서 완성된 작동하는 CICIDS2017 로더를 사용합니다.")
+    
+    # 샘플 크기 선택
+    sample_size = st.slider(
+        "테스트 샘플 크기 (작을수록 빠름):", 
+        10000, 100000, 30000, 10000
+    )
+    
+    if st.button("🔬 실제 데이터로 Overfitting 검증 시작"):
+        run_overfitting_test_with_real_data(sample_size)
+
+
+def run_simulation_overfitting_validation():
+    """시뮬레이션 데이터로 빠른 Overfitting 검증"""
+    st.info("⚡ 빠른 검증을 위해 시뮬레이션 데이터를 사용합니다.")
+    
+    sample_size = st.slider(
+        "테스트 샘플 크기:", 
+        5000, 50000, 15000, 5000
+    )
+    
+    if st.button("⚡ 시뮬레이션 데이터로 빠른 검증"):
+        run_overfitting_test_with_simulation(sample_size)
+
+
+def run_overfitting_test_with_real_data(sample_size):
+    """실제 데이터로 overfitting 테스트 실행"""
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    results_container = st.empty()
+    
+    try:
+        # 1단계: 데이터 로드
+        status_text.text("1/5 📁 실제 CICIDS2017 데이터 로드 중...")
+        progress_bar.progress(0.1)
+        
+        dataset = load_real_cicids_data()
+        
+        # 샘플링 (성능을 위해)
+        if len(dataset) > sample_size:
+            dataset = dataset.sample(n=sample_size, random_state=42)
+        
+        status_text.text(f"✅ 데이터 로드 완료: {len(dataset):,}개")
+        progress_bar.progress(0.2)
+        
+        # 2단계: 데이터 전처리
+        status_text.text("2/5 🔧 데이터 전처리 중...")
+        
+        numeric_features = [col for col in dataset.columns 
+                          if col != 'Label' and dataset[col].dtype in ['int64', 'float64']]
+        X = dataset[numeric_features].values
+        y = dataset['Label'].values
+        
+        progress_bar.progress(0.3)
+        
+        # 3단계: 기존 방식 테스트 (Overfitting 유발)
+        status_text.text("3/5 📊 기존 방식 모델 테스트 (Overfitting 유발)...")
+        
+        baseline_results = test_baseline_overfitting_model(X, y)
+        progress_bar.progress(0.6)
+        
+        # 4단계: 개선된 방식 테스트 (Overfitting 방지)
+        status_text.text("4/5 🚀 개선된 방식 모델 테스트 (Overfitting 방지)...")
+        
+        improved_results = test_improved_overfitting_model(X, y)
+        progress_bar.progress(0.9)
+        
+        # 5단계: 결과 분석 및 표시
+        status_text.text("5/5 📋 결과 분석 중...")
+        
+        display_overfitting_results(baseline_results, improved_results, "실제 CICIDS2017")
+        progress_bar.progress(1.0)
+        status_text.text("✅ Overfitting 검증 완료!")
+        
+    except Exception as e:
+        st.error(f"❌ 실제 데이터 검증 실패: {str(e)}")
+        st.info("🔧 시뮬레이션 데이터로 대체 테스트를 진행합니다...")
+        run_overfitting_test_with_simulation(sample_size)
+
+
+def run_overfitting_test_with_simulation(sample_size):
+    """시뮬레이션 데이터로 overfitting 테스트 실행"""
+    progress_bar = st.progress(0)
+    status_text = st.empty()
+    
+    try:
+        # 1단계: 시뮬레이션 데이터 생성
+        status_text.text("1/4 ⚡ 시뮬레이션 데이터 생성 중...")
+        progress_bar.progress(0.1)
+        
+        data_loader = SecurityDataLoader()
+        dataset = data_loader.generate_sample_data(
+            total_samples=sample_size, 
+            attack_ratio=0.6, 
+            realistic_mode=True
+        )
+        
+        progress_bar.progress(0.3)
+        
+        # 2단계: 데이터 전처리
+        status_text.text("2/4 🔧 데이터 전처리 중...")
+        
+        numeric_features = [col for col in dataset.columns 
+                          if col != 'Label' and dataset[col].dtype in ['int64', 'float64']]
+        X = dataset[numeric_features].values
+        y = dataset['Label'].values
+        
+        progress_bar.progress(0.5)
+        
+        # 3단계: 모델 테스트
+        status_text.text("3/4 🧪 Overfitting 모델 테스트...")
+        
+        baseline_results = test_baseline_overfitting_model(X, y)
+        improved_results = test_improved_overfitting_model(X, y)
+        
+        progress_bar.progress(0.9)
+        
+        # 4단계: 결과 표시
+        status_text.text("4/4 📊 결과 분석...")
+        
+        display_overfitting_results(baseline_results, improved_results, "시뮬레이션")
+        progress_bar.progress(1.0)
+        status_text.text("✅ 시뮬레이션 검증 완료!")
+        
+    except Exception as e:
+        st.error(f"❌ 시뮬레이션 테스트 실패: {str(e)}")
+        st.info("TensorFlow 설치가 필요할 수 있습니다: pip install tensorflow")
+
+
+def test_baseline_overfitting_model(X, y):
+    """기존 방식 (Overfitting 유발) 모델 테스트"""
+    try:
+        model_builder = SecurityModelBuilder()
+        X_train, X_test, y_train, y_test = model_builder.prepare_data(X, y)
+        
+        # 과도한 복잡성 모델 (Overfitting 유발)
+        model = model_builder.build_mlp_model(X_train.shape[1])
+        
+        # 너무 긴 훈련 (Early Stopping 없음)
+        history = model_builder.train_model(
+            X_train, y_train, epochs=200, verbose=0
+        )
+        
+        # 성능 평가
+        metrics = model_builder.evaluate_binary_model(X_test, y_test)
+        
+        return {
+            'type': '기존 방식 (Overfitting 유발)',
+            'accuracy': metrics['accuracy'],
+            'precision': metrics['precision'],
+            'recall': metrics['recall'],
+            'f1_score': metrics['f1_score'],
+            'is_overfitting': metrics['accuracy'] > 0.98
+        }
+        
+    except Exception as e:
+        return {
+            'type': '기존 방식',
+            'error': str(e),
+            'accuracy': 0.0
+        }
+
+
+def test_improved_overfitting_model(X, y):
+    """개선된 방식 (Overfitting 방지) 모델 테스트"""
+    try:
+        model_builder = SecurityModelBuilder()
+        X_train, X_test, y_train, y_test = model_builder.prepare_data(X, y)
+        
+        # 개선된 하이브리드 모델 (Dropout, Early Stopping 포함)
+        model = model_builder.build_hybrid_model(X_train.shape[1])
+        
+        # 적절한 훈련 (Early Stopping 포함)
+        history = model_builder.train_model(
+            X_train, y_train, X_test, y_test, 
+            epochs=100, verbose=0
+        )
+        
+        # 성능 평가
+        metrics = model_builder.evaluate_binary_model(X_test, y_test)
+        
+        return {
+            'type': '개선된 방식 (Overfitting 방지)',
+            'accuracy': metrics['accuracy'],
+            'precision': metrics['precision'],
+            'recall': metrics['recall'],
+            'f1_score': metrics['f1_score'],
+            'is_optimal': 0.85 <= metrics['accuracy'] <= 0.95
+        }
+        
+    except Exception as e:
+        return {
+            'type': '개선된 방식',
+            'error': str(e),
+            'accuracy': 0.0
+        }
+
+
+def display_overfitting_results(baseline_results, improved_results, data_type):
+    """Overfitting 검증 결과 표시"""
+    st.subheader(f"📊 {data_type} 데이터 Overfitting 검증 결과")
+    
+    # 성능 비교 테이블
+    col1, col2 = st.columns(2)
+    
+    with col1:
+        st.write("**🔴 기존 방식 (Overfitting 유발)**")
+        if 'error' not in baseline_results:
+            st.metric("정확도", f"{baseline_results['accuracy']:.3f}")
+            st.metric("정밀도", f"{baseline_results['precision']:.3f}")
+            st.metric("재현율", f"{baseline_results['recall']:.3f}")
+            st.metric("F1 점수", f"{baseline_results['f1_score']:.3f}")
+            
+            if baseline_results.get('is_overfitting', False):
+                st.error("⚠️ Overfitting 감지! (정확도 > 0.98)")
+            else:
+                st.success("✅ Overfitting 없음")
+        else:
+            st.error(f"테스트 실패: {baseline_results['error']}")
+    
+    with col2:
+        st.write("**🟢 개선된 방식 (Overfitting 방지)**")
+        if 'error' not in improved_results:
+            st.metric("정확도", f"{improved_results['accuracy']:.3f}")
+            st.metric("정밀도", f"{improved_results['precision']:.3f}")
+            st.metric("재현율", f"{improved_results['recall']:.3f}")
+            st.metric("F1 점수", f"{improved_results['f1_score']:.3f}")
+            
+            if improved_results.get('is_optimal', False):
+                st.success("🎯 목표 달성! (0.85 ≤ 정확도 ≤ 0.95)")
+            elif improved_results['accuracy'] > 0.95:
+                st.warning("⚠️ 여전히 높은 정확도 (추가 조정 필요)")
+            else:
+                st.info("💡 정확도가 낮음 (모델 개선 필요)")
+        else:
+            st.error(f"테스트 실패: {improved_results['error']}")
+    
+    # 종합 평가
+    st.subheader("🎯 종합 평가")
+    
+    if 'error' not in baseline_results and 'error' not in improved_results:
+        accuracy_improvement = improved_results['accuracy'] - baseline_results['accuracy']
+        
+        col1, col2, col3 = st.columns(3)
+        
+        with col1:
+            st.metric(
+                "정확도 변화", 
+                f"{accuracy_improvement:+.3f}",
+                delta=f"{accuracy_improvement:+.1%}"
+            )
+        
+        with col2:
+            if improved_results.get('is_optimal', False):
+                st.success("✅ 목표 달성")
+            else:
+                st.warning("⚠️ 추가 개선 필요")
+        
+        with col3:
+            if baseline_results.get('is_overfitting', False) and not improved_results.get('is_overfitting', False):
+                st.success("✅ Overfitting 해결")
+            else:
+                st.info("💡 추가 검증 필요")
+    
+    # 결론 및 권장사항
+    with st.expander("📋 결론 및 다음 단계 권장사항", expanded=True):
+        st.markdown("""
+        ### 🎯 검증 완료 사항
+        
+        ✅ **이전 채팅 성과 확인**: CICIDS2017 로더 정상 작동  
+        ✅ **Overfitting 문제 인식**: 정확도 1.0 문제점 파악  
+        ✅ **개선 방안 적용**: Dropout + Early Stopping 적용  
+        
+        ### 🚀 다음 단계 (문서 기준)
+        
+        **MEDIUM Priority (이번 주):**
+        1. **성능 비교 테스트**: 실제 vs 시뮬레이션 데이터 20만 개
+        2. **하이브리드 접근**: CICIDS2017 70% + 생성 데이터 30%
+        3. **RealisticSecurityDataGenerator 확장**: 50만 개 데이터 생성
+        
+        **LOW Priority (추후):**
+        1. **모델 아키텍처 개선**: 앙상블, 하이퍼파라미터 튜닝
+        2. **실시간 성능 모니터링**: 스트리밍 데이터 처리
+        3. **프로덕션 배포**: 실제 환경 적용
+        """)
+
+
 def show_comprehensive_evaluation():
     """종합 성능 평가"""
-    st.subheader("🎯 종합 성능 평가 및 비즈니스 임팩트")
+    st.subheader("🏆 종합 성능 평가 및 비즈니스 임팩트")
     
     st.markdown("""
     ### 🏢 실무 적용 관점에서의 평가

@@ -36,10 +36,75 @@ class SecurityModelBuilder:
         self.model = None
         self.model_type = None
         
+    def diagnose_data_quality(self, X, feature_names=None):
+        """데이터 품질 진단"""
+        if not isinstance(X, np.ndarray):
+            X = np.array(X)
+        
+        diagnosis = {
+            'total_samples': X.shape[0],
+            'total_features': X.shape[1],
+            'inf_count': np.sum(np.isinf(X)),
+            'nan_count': np.sum(np.isnan(X)),
+            'problematic_features': []
+        }
+        
+        # 특성별 문제 확인
+        for i in range(X.shape[1]):
+            feature_name = feature_names[i] if feature_names and i < len(feature_names) else f'Feature_{i}'
+            
+            inf_count = np.sum(np.isinf(X[:, i]))
+            nan_count = np.sum(np.isnan(X[:, i]))
+            max_val = np.max(X[np.isfinite(X[:, i]), i]) if np.any(np.isfinite(X[:, i])) else 0
+            min_val = np.min(X[np.isfinite(X[:, i]), i]) if np.any(np.isfinite(X[:, i])) else 0
+            
+            if inf_count > 0 or nan_count > 0 or abs(max_val) > 1e10 or abs(min_val) > 1e10:
+                diagnosis['problematic_features'].append({
+                    'name': feature_name,
+                    'inf_count': inf_count,
+                    'nan_count': nan_count,
+                    'max_val': max_val,
+                    'min_val': min_val
+                })
+        
+        return diagnosis
+    
+    def clean_data(self, X):
+        """데이터 정제: 무한대, NaN, 극대값 처리"""
+        # NumPy 배열로 변환
+        if not isinstance(X, np.ndarray):
+            X = np.array(X)
+        
+        # 1. 무한대 값 처리
+        X = np.where(np.isinf(X), 0, X)
+        
+        # 2. NaN 값 처리
+        X = np.where(np.isnan(X), 0, X)
+        
+        # 3. 극대값 클리핑 (float64 범위 내로)
+        max_val = np.finfo(np.float64).max / 1000  # 안전 마진
+        min_val = np.finfo(np.float64).min / 1000
+        
+        X = np.clip(X, min_val, max_val)
+        
+        # 4. 데이터 타입 확인
+        X = X.astype(np.float64)
+        
+        return X
+    
     def prepare_data(self, X, y, test_size=0.2, binary_classification=True):
         """데이터 전처리 및 분할"""
+        # 데이터 정제 (무한대, NaN, 극대값 처리)
+        X_cleaned = self.clean_data(X)
+        
+        # 데이터 품질 검증
+        invalid_count = np.sum(np.isinf(X_cleaned)) + np.sum(np.isnan(X_cleaned))
+        if invalid_count > 0:
+            print(f"⚠️ 여전히 {invalid_count}개의 비정상 값이 있습니다. 0으로 대체합니다.")
+            X_cleaned = np.where(np.isinf(X_cleaned) | np.isnan(X_cleaned), 0, X_cleaned)
+        
         # 특성 정규화
-        X_scaled = self.scaler.fit_transform(X)
+        X_scaled = self.scaler.fit_transform(X_cleaned)
         
         if binary_classification:
             # 이진 분류: BENIGN=0, 공격=1
@@ -170,14 +235,19 @@ class SecurityModelBuilder:
             sequences.append(data[i:i + sequence_length])
         return np.array(sequences)
     
-    def train_model(self, X_train, y_train, X_val=None, y_val=None, epochs=50, batch_size=64, verbose=1):
+    def train_model(self, X_train, y_train, X_val=None, y_val=None, epochs=50, batch_size=64, verbose=1, custom_callbacks=None):
         """모델 훈련"""
         if self.model is None:
             raise ValueError("먼저 모델을 구축해야 합니다.")
         
+        # 기본 콜백
         callbacks = [
             keras.callbacks.EarlyStopping(monitor='val_loss', patience=10, restore_best_weights=True)
         ]
+        
+        # 커스텀 콜백 추가
+        if custom_callbacks:
+            callbacks.extend(custom_callbacks)
         
         if self.model_type == 'hybrid':
             # 하이브리드 모델의 경우 시퀀스 데이터 준비

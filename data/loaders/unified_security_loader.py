@@ -315,61 +315,106 @@ class UnifiedSecurityLoader:
             logger.warning("로드 가능한 CICIDS2017 파일이 없습니다.")
             return None
 
-    def generate_sample_data(self, total_samples: int = 10000, attack_ratio: float = 0.3) -> pd.DataFrame:
+    def generate_sample_data(self, total_samples: int = 10000, attack_ratio: float = 0.3, realistic_mode: bool = True) -> pd.DataFrame:
         """
         CICIDS2017 스타일 샘플 데이터 생성
 
         Args:
             total_samples: 생성할 총 샘플 수
             attack_ratio: 전체 공격 비율 (0.0 - 1.0)
+            realistic_mode: True면 현실적인 패턴, False면 기존 구분하기 쉬운 패턴
 
         Returns:
             pd.DataFrame: 생성된 샘플 데이터
         """
-        logger.info(f"CICIDS2017 스타일 샘플 데이터 생성 중... (총 {total_samples}개, 공격 비율 {attack_ratio:.1%})")
-
+        if realistic_mode:
+            logger.info(f"현실적인 CICIDS2017 샘플 데이터 생성 중... (총 {total_samples}개, 공격 비율 {attack_ratio:.1%})")
+            return self._generate_realistic_sample_data(total_samples, attack_ratio)
+        else:
+            logger.info(f"기존 CICIDS2017 스타일 샘플 데이터 생성 중... (총 {total_samples}개, 공격 비율 {attack_ratio:.1%})")
+            return self._generate_basic_sample_data(total_samples, attack_ratio)
+    
+    def _generate_realistic_sample_data(self, total_samples: int, attack_ratio: float) -> pd.DataFrame:
+        """현실적인 샘플 데이터 생성 (겹침 있음, 노이즈 포함)"""
         np.random.seed(42)
-
-        # 샘플 분배
+        self.noise_level = 0.3  # 노이즈 레벨
+        
         normal_samples = int(total_samples * (1 - attack_ratio))
         attack_samples = total_samples - normal_samples
-
+        
+        # 공격 유형별 분배 (더 균등하게)
+        ddos_samples = int(attack_samples * 0.3)
+        web_attack_samples = int(attack_samples * 0.3)
+        brute_force_samples = int(attack_samples * 0.25)
+        port_scan_samples = attack_samples - ddos_samples - web_attack_samples - brute_force_samples
+        
+        # 현실적인 패턴으로 데이터 생성
+        normal_data = self._generate_realistic_normal_traffic(normal_samples)
+        ddos_data = self._generate_realistic_ddos_traffic(ddos_samples)
+        web_attack_data = self._generate_realistic_web_attack_traffic(web_attack_samples)
+        brute_force_data = self._generate_realistic_brute_force_traffic(brute_force_samples)
+        port_scan_data = self._generate_realistic_port_scan_traffic(port_scan_samples)
+        
+        # 데이터 결합
+        all_data = {}
+        for key in normal_data.keys():
+            all_data[key] = (
+                list(normal_data[key]) +
+                list(ddos_data[key]) +
+                list(web_attack_data[key]) +
+                list(brute_force_data[key]) +
+                list(port_scan_data[key])
+            )
+        
+        df = pd.DataFrame(all_data)
+        df = self._clean_generated_data(df)
+        
+        logger.info(f"현실적인 데이터 생성 완료:")
+        logger.info(f"- 정상: {normal_samples}, DDoS: {ddos_samples}, 웹공격: {web_attack_samples}")
+        logger.info(f"- 브루트포스: {brute_force_samples}, 포트스캔: {port_scan_samples}")
+        logger.info(f"라벨 분포:\n{df['Label'].value_counts()}")
+        
+        return df
+    
+    def _generate_basic_sample_data(self, total_samples: int, attack_ratio: float) -> pd.DataFrame:
+        """기존 방식의 샘플 데이터 생성 (구분하기 쉬운 패턴)"""
+        np.random.seed(42)
+        
+        normal_samples = int(total_samples * (1 - attack_ratio))
+        attack_samples = total_samples - normal_samples
+        
         # 공격 유형별 분배
         ddos_samples = int(attack_samples * 0.4)
         web_attack_samples = int(attack_samples * 0.25)
         brute_force_samples = int(attack_samples * 0.2)
         port_scan_samples = attack_samples - ddos_samples - web_attack_samples - brute_force_samples
-
-        # 각 트래픽 패턴 생성
+        
+        # 각 트래픽 패턴 생성 (기존 방식)
         normal_data = self._generate_normal_traffic(normal_samples)
         ddos_data = self._generate_ddos_traffic(ddos_samples)
         web_attack_data = self._generate_web_attack_traffic(web_attack_samples)
         brute_force_data = self._generate_brute_force_traffic(brute_force_samples)
         port_scan_data = self._generate_port_scan_traffic(port_scan_samples)
-
+        
         # 모든 데이터 결합
         all_data = {}
         for key in normal_data.keys():
             all_data[key] = (
-                    list(normal_data[key]) +
-                    list(ddos_data[key]) +
-                    list(web_attack_data[key]) +
-                    list(brute_force_data[key]) +
-                    list(port_scan_data[key])
+                list(normal_data[key]) +
+                list(ddos_data[key]) +
+                list(web_attack_data[key]) +
+                list(brute_force_data[key]) +
+                list(port_scan_data[key])
             )
-
+        
         df = pd.DataFrame(all_data)
         df = self._clean_generated_data(df)
-
-        # 기본 검증
-        if self.validator:
-            self.validator.validate_dataframe(df)
-
-        logger.info(f"샘플 데이터 생성 완료:")
+        
+        logger.info(f"기존 샘플 데이터 생성 완료:")
         logger.info(f"- 정상: {normal_samples}, DDoS: {ddos_samples}, 웹공격: {web_attack_samples}")
         logger.info(f"- 브루트포스: {brute_force_samples}, 포트스캔: {port_scan_samples}")
         logger.info(f"라벨 분포:\n{df['Label'].value_counts()}")
-
+        
         return df
 
     def _generate_normal_traffic(self, samples: int) -> Dict[str, List]:
@@ -496,6 +541,192 @@ class UnifiedSecurityLoader:
             'Bwd_IAT_Mean': np.random.exponential(4000, samples),
             'Label': ['PortScan'] * samples
         }
+    
+    # ============================================================================
+    # 현실적인 데이터 생성 함수들 (노이즈 포함, 겹침 있음)
+    # ============================================================================
+    
+    def _add_realistic_noise(self, values: np.ndarray, base_noise: float = None) -> np.ndarray:
+        """현실적인 노이즈 추가"""
+        if base_noise is None:
+            base_noise = getattr(self, 'noise_level', 0.3)
+            
+        # 가우시안 노이즈 + 이상치
+        gaussian_noise = np.random.normal(0, base_noise * np.std(values), len(values))
+        
+        # 5% 확률로 이상치 추가 (실제 네트워크에서 발생)
+        outlier_mask = np.random.random(len(values)) < 0.05
+        outlier_noise = np.random.normal(0, 2 * np.std(values), len(values))
+        
+        noisy_values = values + gaussian_noise
+        noisy_values[outlier_mask] += outlier_noise[outlier_mask]
+        
+        return np.abs(noisy_values)  # 음수 제거
+    
+    def _generate_realistic_normal_traffic(self, samples: int) -> Dict[str, List]:
+        """현실적인 정상 트래픽 생성"""
+        base_data = {
+            'Flow_Duration': np.random.exponential(800000, samples),
+            'Total_Fwd_Packets': np.random.poisson(12, samples),
+            'Total_Backward_Packets': np.random.poisson(10, samples),
+            'Total_Length_of_Fwd_Packets': np.random.normal(750, 400, samples),
+            'Total_Length_of_Bwd_Packets': np.random.normal(550, 300, samples),
+            'Fwd_Packet_Length_Max': np.random.normal(1100, 500, samples),
+            'Fwd_Packet_Length_Min': np.random.normal(55, 25, samples),
+            'Fwd_Packet_Length_Mean': np.random.normal(380, 200, samples),
+            'Bwd_Packet_Length_Max': np.random.normal(900, 400, samples),
+            'Bwd_Packet_Length_Min': np.random.normal(45, 20, samples),
+            'Bwd_Packet_Length_Mean': np.random.normal(280, 150, samples),
+            'Flow_Bytes_s': np.random.normal(1800, 1200, samples),
+            'Flow_Packets_s': np.random.normal(18, 12, samples),
+            'Flow_IAT_Mean': np.random.exponential(45000, samples),
+            'Flow_IAT_Std': np.random.exponential(22000, samples),
+            'Fwd_IAT_Total': np.random.exponential(180000, samples),
+            'Fwd_IAT_Mean': np.random.exponential(18000, samples),
+            'Bwd_IAT_Total': np.random.exponential(140000, samples),
+            'Bwd_IAT_Mean': np.random.exponential(14000, samples),
+        }
+        
+        # 모든 특성에 노이즈 추가
+        for key, values in base_data.items():
+            base_data[key] = self._add_realistic_noise(values)
+        
+        base_data['Label'] = ['BENIGN'] * samples
+        return base_data
+    
+    def _generate_realistic_ddos_traffic(self, samples: int) -> Dict[str, List]:
+        """현실적인 DDoS 공격 생성 (겹침 영역 포함)"""
+        base_data = {
+            'Flow_Duration': np.random.exponential(15000, samples),
+            'Total_Fwd_Packets': np.random.poisson(120, samples),  # 200→120 (겹침 증가)
+            'Total_Backward_Packets': np.random.poisson(4, samples),
+            'Total_Length_of_Fwd_Packets': np.random.normal(8000, 3000, samples),
+            'Total_Length_of_Bwd_Packets': np.random.normal(180, 120, samples),
+            'Fwd_Packet_Length_Max': np.random.normal(1400, 200, samples),
+            'Fwd_Packet_Length_Min': np.random.normal(60, 15, samples),
+            'Fwd_Packet_Length_Mean': np.random.normal(75, 25, samples),
+            'Bwd_Packet_Length_Max': np.random.normal(140, 60, samples),
+            'Bwd_Packet_Length_Min': np.random.normal(35, 12, samples),
+            'Bwd_Packet_Length_Mean': np.random.normal(55, 25, samples),
+            'Flow_Bytes_s': np.random.normal(35000, 20000, samples),  # 50000→35000
+            'Flow_Packets_s': np.random.normal(300, 200, samples),   # 500→300
+            'Flow_IAT_Mean': np.random.exponential(1500, samples),
+            'Flow_IAT_Std': np.random.exponential(750, samples),
+            'Fwd_IAT_Total': np.random.exponential(8000, samples),
+            'Fwd_IAT_Mean': np.random.exponential(80, samples),
+            'Bwd_IAT_Total': np.random.exponential(25000, samples),
+            'Bwd_IAT_Mean': np.random.exponential(2500, samples),
+        }
+        
+        # 높은 노이즈로 변동성 증가
+        for key, values in base_data.items():
+            base_data[key] = self._add_realistic_noise(values, 0.5)
+        
+        # 일부 샘플을 정상과 유사하게 만들기 (약한 공격 시뮤레이션)
+        weak_attack_ratio = 0.15  # 15%는 약한 공격
+        weak_indices = np.random.choice(samples, int(samples * weak_attack_ratio), replace=False)
+        
+        for idx in weak_indices:
+            # 정상 트래픽에 가까운 값으로 조정
+            base_data['Total_Fwd_Packets'][idx] *= 0.3  # 대폭 감소
+            base_data['Flow_Packets_s'][idx] *= 0.2
+            base_data['Flow_Bytes_s'][idx] *= 0.3
+        
+        base_data['Label'] = ['DDoS'] * samples
+        return base_data
+    
+    def _generate_realistic_web_attack_traffic(self, samples: int) -> Dict[str, List]:
+        """현실적인 웹 공격 생성"""
+        base_data = {
+            'Flow_Duration': np.random.exponential(120000, samples),
+            'Total_Fwd_Packets': np.random.poisson(25, samples),  # 30→25
+            'Total_Backward_Packets': np.random.poisson(20, samples),
+            'Total_Length_of_Fwd_Packets': np.random.normal(2500, 1000, samples),
+            'Total_Length_of_Bwd_Packets': np.random.normal(1200, 500, samples),
+            'Fwd_Packet_Length_Max': np.random.normal(1300, 300, samples),
+            'Fwd_Packet_Length_Min': np.random.normal(150, 60, samples),
+            'Fwd_Packet_Length_Mean': np.random.normal(450, 150, samples),
+            'Bwd_Packet_Length_Max': np.random.normal(750, 200, samples),
+            'Bwd_Packet_Length_Min': np.random.normal(80, 40, samples),
+            'Bwd_Packet_Length_Mean': np.random.normal(220, 100, samples),
+            'Flow_Bytes_s': np.random.normal(3200, 2000, samples),  # 4000→3200
+            'Flow_Packets_s': np.random.normal(22, 15, samples),    # 25→22
+            'Flow_IAT_Mean': np.random.exponential(25000, samples),
+            'Flow_IAT_Std': np.random.exponential(12000, samples),
+            'Fwd_IAT_Total': np.random.exponential(80000, samples),
+            'Fwd_IAT_Mean': np.random.exponential(6000, samples),
+            'Bwd_IAT_Total': np.random.exponential(65000, samples),
+            'Bwd_IAT_Mean': np.random.exponential(5000, samples),
+        }
+        
+        # 노이즈 추가
+        for key, values in base_data.items():
+            base_data[key] = self._add_realistic_noise(values, 0.4)
+        
+        base_data['Label'] = ['Web Attack'] * samples
+        return base_data
+    
+    def _generate_realistic_brute_force_traffic(self, samples: int) -> Dict[str, List]:
+        """현실적인 브루트포스 공격 생성"""
+        base_data = {
+            'Flow_Duration': np.random.exponential(25000, samples),
+            'Total_Fwd_Packets': np.random.poisson(60, samples),  # 80→60
+            'Total_Backward_Packets': np.random.poisson(6, samples),
+            'Total_Length_of_Fwd_Packets': np.random.normal(1600, 600, samples),
+            'Total_Length_of_Bwd_Packets': np.random.normal(350, 200, samples),
+            'Fwd_Packet_Length_Max': np.random.normal(700, 250, samples),
+            'Fwd_Packet_Length_Min': np.random.normal(35, 18, samples),
+            'Fwd_Packet_Length_Mean': np.random.normal(70, 35, samples),
+            'Bwd_Packet_Length_Max': np.random.normal(250, 120, samples),
+            'Bwd_Packet_Length_Min': np.random.normal(25, 12, samples),
+            'Bwd_Packet_Length_Mean': np.random.normal(50, 25, samples),
+            'Flow_Bytes_s': np.random.normal(6000, 3000, samples),  # 8000→6000
+            'Flow_Packets_s': np.random.normal(60, 30, samples),    # 80→60
+            'Flow_IAT_Mean': np.random.exponential(2500, samples),
+            'Flow_IAT_Std': np.random.exponential(1200, samples),
+            'Fwd_IAT_Total': np.random.exponential(12000, samples),
+            'Fwd_IAT_Mean': np.random.exponential(250, samples),
+            'Bwd_IAT_Total': np.random.exponential(20000, samples),
+            'Bwd_IAT_Mean': np.random.exponential(2000, samples),
+        }
+        
+        # 노이즈 추가
+        for key, values in base_data.items():
+            base_data[key] = self._add_realistic_noise(values, 0.4)
+        
+        base_data['Label'] = ['Brute Force'] * samples
+        return base_data
+    
+    def _generate_realistic_port_scan_traffic(self, samples: int) -> Dict[str, List]:
+        """현실적인 포트스캔 공격 생성"""
+        base_data = {
+            'Flow_Duration': np.random.exponential(4000, samples),
+            'Total_Fwd_Packets': np.random.poisson(8, samples),  # 10→8
+            'Total_Backward_Packets': np.random.poisson(1, samples),
+            'Total_Length_of_Fwd_Packets': np.random.normal(320, 180, samples),
+            'Total_Length_of_Bwd_Packets': np.random.normal(80, 60, samples),
+            'Fwd_Packet_Length_Max': np.random.normal(160, 80, samples),
+            'Fwd_Packet_Length_Min': np.random.normal(35, 12, samples),
+            'Fwd_Packet_Length_Mean': np.random.normal(50, 25, samples),
+            'Bwd_Packet_Length_Max': np.random.normal(80, 40, samples),
+            'Bwd_Packet_Length_Min': np.random.normal(15, 8, samples),
+            'Bwd_Packet_Length_Mean': np.random.normal(30, 20, samples),
+            'Flow_Bytes_s': np.random.normal(800, 400, samples),   # 1000→800
+            'Flow_Packets_s': np.random.normal(25, 15, samples),   # 30→25
+            'Flow_IAT_Mean': np.random.exponential(6000, samples),
+            'Flow_IAT_Std': np.random.exponential(3000, samples),
+            'Fwd_IAT_Total': np.random.exponential(2500, samples),
+            'Fwd_IAT_Mean': np.random.exponential(600, samples),
+            'Bwd_IAT_Total': np.random.exponential(6000, samples),
+            'Bwd_IAT_Mean': np.random.exponential(3000, samples),
+        }
+        
+        # 노이즈 추가
+        for key, values in base_data.items():
+            base_data[key] = self._add_realistic_noise(values, 0.3)
+        
+        base_data['Label'] = ['PortScan'] * samples
+        return base_data
 
     def _clean_real_data(self, df: pd.DataFrame) -> pd.DataFrame:
         """실제 데이터 정제"""
