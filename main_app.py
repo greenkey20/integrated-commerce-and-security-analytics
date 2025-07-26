@@ -298,13 +298,13 @@ def show_footer():
     <hr style="margin-top:2em;margin-bottom:1em;">
     <div style="text-align:center; color:gray; font-size:0.95em;">
         <b>Integrated Commerce & Security Analytics</b> &nbsp;|&nbsp; 
-        <a href="https://github.com/your-repo" target="_blank">GitHub</a> &nbsp;|&nbsp; 
-        <a href="mailto:contact@yourdomain.com">Contact</a>
+        <a href="https://github.com/greenkey20" target="_blank">GitHub</a> &nbsp;|&nbsp; 
+        <a href="mailto:greenkey20@github.com">Contact</a>
         <br>
         <span>
             데이터: Mall Customer, Online Retail, CICIDS2017<br>
             기술: Python, Streamlit, Scikit-learn, TensorFlow, Plotly<br>
-            버전: {ver} &nbsp;|&nbsp; © 2025 Eunyoung KANG. All rights reserved.
+            버전: {ver} &nbsp;|&nbsp; © 2025 green umbrella by Eunyoung KANG. All rights reserved.
         </span>
     </div>
     """.format(ver=AppConfig.VERSION), unsafe_allow_html=True)
