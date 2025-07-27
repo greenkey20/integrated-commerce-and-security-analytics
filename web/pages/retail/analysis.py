@@ -12,6 +12,21 @@ import pandas as pd
 import numpy as np
 import warnings
 
+
+def safe_rerun():
+    """Streamlit 버전에 관계없이 안전한 rerun 실행"""
+    try:
+        if hasattr(st, 'rerun'):
+            st.rerun()
+        elif hasattr(st, 'experimental_rerun'):
+            st.experimental_rerun()
+        else:
+            # fallback: 페이지 새로고침 메시지
+            st.info("페이지를 새로고침해주세요.")
+    except Exception as e:
+        st.warning(f"페이지 새로고침이 필요합니다: {str(e)}")
+        st.info("브라우저에서 F5키를 눌러 새로고침해주세요.")
+
 # 리팩토링된 페이지 모듈들 import
 from web.pages.retail.data_loading import show_data_loading_page, get_data_loading_status
 from web.pages.retail.data_cleaning import show_data_cleaning_page, get_data_cleaning_status
@@ -222,12 +237,12 @@ def setup_sidebar():
         for key in keys_to_clear:
             del st.session_state[key]
         st.sidebar.success("초기화 완료!")
-        st.rerun()
+        safe_rerun()
     
     if completed_steps == 6:
         if st.sidebar.button("📊 분석 요약 보기"):
             st.session_state.analysis_step = "📊 전체 분석 요약"
-            st.rerun()
+            safe_rerun()
 
 
 def show_analysis_summary_page():
