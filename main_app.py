@@ -398,7 +398,7 @@ def setup_simple_sidebar():
     """탭 스타일 네비게이션"""
     # 세션 상태 초기화
     if 'current_focus' not in st.session_state:
-        st.session_state.current_focus = 'retail'
+        st.session_state.current_focus = None
     if 'dark_mode' not in st.session_state:
         st.session_state.dark_mode = False
     
@@ -424,7 +424,7 @@ def setup_simple_sidebar():
     col1, col2 = st.sidebar.columns(2)
     
     with col1:
-        if st.button("💰\n1. Retail\nPrediction", key="tab_retail", 
+        if st.button("💰\n1.Retail\nPrediction", key="tab_retail", 
                     type="primary" if st.session_state.current_focus == 'retail' else "secondary",
                     use_container_width=True):
             st.session_state.current_focus = 'retail'
@@ -503,7 +503,10 @@ def setup_simple_sidebar():
     
     # 현재 포커스 표시
     focus_emoji = {'retail': '💰', 'customer': '👥', 'security': '🔒'}
-    st.sidebar.markdown(f"**현재 포커스**: {focus_emoji.get(st.session_state.current_focus, '💰')} {st.session_state.current_focus.title()}")
+    if st.session_state.current_focus:
+        st.sidebar.markdown(f"**현재 포커스**: {focus_emoji.get(st.session_state.current_focus, '💰')} {st.session_state.current_focus.title()}")
+    else:
+        st.sidebar.markdown("**현재 포커스**: 탭을 선택하세요")
     st.sidebar.markdown("---")
 
     return retail_step, customer_step, security_step, st.session_state.current_focus, st.session_state.dark_mode
@@ -513,12 +516,13 @@ def route_to_hierarchical_page(retail_step, customer_step, security_step, curren
     
     try:
         # 현재 포커스된 섹션만 표시
-        focus_info = {
-            'retail': f"💰 Retail: {retail_step}",
-            'customer': f"👥 Customer: {customer_step}",
-            'security': f"🔒 Security: {security_step}"
-        }
-        st.info(f"{focus_info[current_focus]}")
+        if current_focus:
+            focus_info = {
+                'retail': f"💰 Retail: {retail_step}",
+                'customer': f"👥 Customer: {customer_step}",
+                'security': f"🔒 Security: {security_step}"
+            }
+            st.info(f"{focus_info[current_focus]}")
 
         # 포커스된 섹션에 따라 라우팅
         if current_focus == 'retail':
@@ -601,61 +605,63 @@ def route_to_hierarchical_page(retail_step, customer_step, security_step, curren
             # 3. Security Analytics 라우팅
             if "1️⃣ 데이터 로딩" in security_step:
                 if pages['security_analysis']:
-                    st.info("📍 Security: 데이터 로딩 섹션")
+                    # st.info("📍 Security: 데이터 로딩 섹션")
                     from web.pages.security.security_analysis_page import show_data_download_section
                     show_data_download_section()
                 else:
                     show_fallback_page("🔒 Security 데이터", "CICIDS2017 데이터 로딩")
             elif "2️⃣ 탐색적" in security_step:
                 if pages['security_analysis']:
-                    st.info("📍 Security: 탐색적 분석 섹션")
+                    # st.info("📍 Security: 탐색적 분석 섹션")
                     from web.pages.security.security_analysis_page import show_exploratory_analysis_section
                     show_exploratory_analysis_section()
                 else:
                     show_fallback_page("🔍 Security EDA", "CICIDS2017 탐색적 분석")
             elif "3️⃣ 공격 패턴" in security_step:
                 if pages['security_analysis']:
-                    st.info("📍 Security: 공격 패턴 심화 분석")
+                    # st.info("📍 Security: 공격 패턴 심화 분석")
                     from web.pages.security.security_analysis_page import show_attack_pattern_analysis
                     show_attack_pattern_analysis()
                 else:
                     show_fallback_page("⚡ 공격 패턴", "CICIDS2017 공격 패턴 분석")
             elif "4️⃣ 딥러닝" in security_step:
                 if pages['security_analysis']:
-                    st.info("📍 Security: 딥러닝 모델링")
+                    # st.info("📍 Security: 딥러닝 모델링")
                     from web.pages.security.security_analysis_page import show_deep_learning_detection
                     show_deep_learning_detection()
                 else:
                     show_fallback_page("🌱 Security 딥러닝", "CICIDS2017 딥러닝 모델")
             elif "5️⃣ Overfitting" in security_step:
                 if pages['security_analysis']:
-                    st.info("📍 Security: Overfitting 해결 검증")
+                    # st.info("📍 Security: Overfitting 해결 검증")
                     from web.pages.security.security_analysis_page import show_overfitting_validation
                     show_overfitting_validation()
                 else:
                     show_fallback_page("🎯 Overfitting 검증", "CICIDS2017 Overfitting 해결")
             elif "6️⃣ 실시간" in security_step:
                 if pages['security_analysis']:
-                    st.info("📍 Security: 실시간 예측 테스트")
+                    # st.info("📍 Security: 실시간 예측 테스트")
                     from web.pages.security.security_analysis_page import show_real_time_prediction
                     show_real_time_prediction()
                 else:
                     show_fallback_page("📊 실시간 예측", "CICIDS2017 실시간 탐지")
             elif "7️⃣ 종합" in security_step:
                 if pages['security_analysis']:
-                    st.info("📍 Security: 종합 성능 평가")
+                    # st.info("📍 Security: 종합 성능 평가")
                     from web.pages.security.security_analysis_page import show_comprehensive_evaluation
                     show_comprehensive_evaluation()
                 else:
                     show_fallback_page("🏆 종합 평가", "CICIDS2017 성능 평가")
-
+        
+        elif current_focus is None:
+            # 아무 탭도 선택 안된 상태
+            st.info("📍 좌측 탭을 클릭하여 분석을 시작하세요")
+            
         else:
             # 알 수 없는 포커스 (기본: retail)
             st.session_state.current_focus = 'retail'
             if pages['retail_analysis']:
                 pages['retail_analysis']()
-            else:
-                show_fallback_page("🎆 Welcome", "통합 커머스 & 보안 분석 플랫폼")
             
     except Exception as e:
         st.error(f"라우팅 오류: {str(e)}")
@@ -816,12 +822,15 @@ def main():
                 st.success(f"✅ 모든 페이지 로딩 완료: {loaded_count}개 페이지 준비됨")
                 
             # 현재 포커스 정보
-            focus_info = {
-                'retail': f"💰 Retail: {retail_step}",
-                'customer': f"👥 Customer: {customer_step}", 
-                'security': f"🔒 Security: {security_step}"
-            }
-            st.info(f"📍 **현재 포커스**: {focus_info[current_focus]}")
+            if current_focus:
+                focus_info = {
+                    'retail': f"💰 Retail: {retail_step}",
+                    'customer': f"👥 Customer: {customer_step}", 
+                    'security': f"🔒 Security: {security_step}"
+                }
+                st.info(f"📍 **현재 포커스**: {focus_info[current_focus]}")
+            else:
+                st.info("📍 **현재 포커스**: 선택 안됨")
         
         # 5. 푸터 표시
         show_footer()

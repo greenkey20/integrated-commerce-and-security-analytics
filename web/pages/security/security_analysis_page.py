@@ -437,6 +437,21 @@ def show_feature_distribution(data):
     """네트워크 특성 분포 분석"""
     st.subheader("📈 주요 네트워크 특성 분포")
     
+    # 초록색 multiselect 스타일링
+    st.markdown("""
+    <style>
+    /* multiselect 버튼 초록색 스타일링 */
+    .stMultiSelect > div > div > div {
+        background-color: #16A34A !important;
+        color: white !important;
+        border: 1px solid #15803D !important;
+    }
+    .stMultiSelect > div > div > div:hover {
+        background-color: #15803D !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # 네트워크 특성 설명
     with st.expander("📝 네트워크 특성들이 뭘 의미하나요?", expanded=False):
         st.markdown("""
@@ -530,6 +545,29 @@ def display_feature_comparison(data, features):
 def show_correlation_analysis(data):
     """상관관계 분석"""
     st.subheader("🔗 특성 간 상관관계 분석")
+    
+    # 초록색 multiselect 스타일링 (다른 key로 구분)
+    st.markdown("""
+    <style>
+    /* 상관관계 multiselect 버튼 초록색 스타일링 */
+    div[data-testid="stMultiSelect"] > div > div {
+        background: linear-gradient(135deg, #16A34A, #15803D) !important;
+        border: 1px solid #15803D !important;
+        border-radius: 6px !important;
+    }
+    div[data-testid="stMultiSelect"] > div > div:hover {
+        background: linear-gradient(135deg, #15803D, #166534) !important;
+        transform: translateY(-1px) !important;
+        box-shadow: 0 4px 8px rgba(22, 163, 74, 0.25) !important;
+    }
+    /* 선택된 태그 스타일링 */
+    div[data-testid="stMultiSelect"] span {
+        background-color: #22C55E !important;
+        color: white !important;
+        border: 1px solid #16A34A !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
     
     numeric_features = [col for col in data.columns if col != 'Label' and data[col].dtype in ['int64', 'float64']]
     selected_features = st.multiselect(
