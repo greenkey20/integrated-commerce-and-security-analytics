@@ -195,13 +195,13 @@ def initialize_app():
     
     # 제목 및 소개
     st.title("🌿 Integrated Commerce & Security Analytics")
-    st.markdown("""
-    **차세대 이커머스를 위한 통합 인텔리전스 플랫폼**
-    
-    고객 인사이트부터 보안 모니터링까지, 데이터 기반 비즈니스 성장을 지원합니다.
-    
-    **버전**: v3.0 - 통합 분석 플랫폼 (Simple Edition)
-    """)
+    # st.markdown("""
+    # **차세대 이커머스를 위한 통합 인텔리전스 플랫폼**
+    #
+    # 고객 인사이트부터 보안 모니터링까지, 데이터 기반 비즈니스 성장을 지원합니다.
+    #
+    # **버전**: v3.0 - 통합 분석 플랫폼 (Simple Edition)
+    # """)
 
 def apply_theme_css(dark_mode=False):
     """다크 모드 또는 라이트 모드 CSS 동적 적용"""
@@ -279,6 +279,26 @@ def apply_theme_css(dark_mode=False):
             background: rgba(31, 41, 55, 0.95) !important;
             border-radius: 8px !important;
         }
+        
+        /* Green Theme 버튼 스타일링 - Dark Mode */
+        .stButton > button {
+            background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #16A34A, #15803D) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(34, 197, 94, 0.25) !important;
+        }
+        .stDownloadButton > button {
+            background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+        }
         </style>
         """, unsafe_allow_html=True)
     
@@ -351,12 +371,32 @@ def apply_theme_css(dark_mode=False):
             background: rgba(255, 255, 255, 0.95) !important;
             border-radius: 8px !important;
         }
+        
+        /* Green Theme 버튼 스타일링 - Light Mode */
+        .stButton > button {
+            background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+            border-radius: 8px !important;
+            font-weight: 600 !important;
+            transition: all 0.3s ease !important;
+        }
+        .stButton > button:hover {
+            background: linear-gradient(135deg, #16A34A, #15803D) !important;
+            transform: translateY(-1px) !important;
+            box-shadow: 0 4px 8px rgba(34, 197, 94, 0.25) !important;
+        }
+        .stDownloadButton > button {
+            background: linear-gradient(135deg, #22C55E, #16A34A) !important;
+            color: #FFFFFF !important;
+            border: none !important;
+        }
         </style>
         """, unsafe_allow_html=True)
 
 def setup_simple_sidebar():
     """계층형 네비게이션 (Business Intelligence + Security Analytics)"""
-    st.sidebar.title("📋 Navigation")
+    # st.sidebar.title("📋 Navigation")
     
     # 세션 상태 초기화
     if 'current_focus' not in st.session_state:
@@ -365,7 +405,7 @@ def setup_simple_sidebar():
         st.session_state.dark_mode = False
     
     # 🌙 Dark Mode 토글 (상단에 추가)
-    st.sidebar.markdown("---")
+    # st.sidebar.markdown("---")
     dark_mode = st.sidebar.toggle(
         "🌙 Dark Mode",
         value=st.session_state.dark_mode,
@@ -378,7 +418,7 @@ def setup_simple_sidebar():
         st.session_state.dark_mode = dark_mode
         st.rerun()
     
-    st.sidebar.markdown("---")
+    # st.sidebar.markdown("---")
     
     # A. Business Intelligence 섹션
     st.sidebar.markdown("### 📊 **A. Business Intelligence**")
@@ -418,7 +458,7 @@ def setup_simple_sidebar():
     )
     
     # B. Security Analytics 섹션
-    st.sidebar.markdown("---")
+    # st.sidebar.markdown("---")
     st.sidebar.markdown("### 🛡️ **B. Security Analytics**")
     
     # 1. 네트워크 보안 이상 탐지 분석
@@ -438,15 +478,16 @@ def setup_simple_sidebar():
         on_change=lambda: setattr(st.session_state, 'current_focus', 'security')
     )
     
-    # 현재 포커스 표시
-    focus_emoji = {'retail': '💰', 'customer': '👥', 'security': '🔒'}
-    st.sidebar.markdown(f"**현재 포커스**: {focus_emoji.get(st.session_state.current_focus, '💰')} {st.session_state.current_focus.title()}")
-    
-    # 빠른 액션
     st.sidebar.markdown("---")
+    # 빠른 액션
     if st.sidebar.button("🔄 새로고침", key="refresh"):
         st.rerun()
     
+    # 현재 포커스 표시 (새로고침 버튼 아래로 이동)
+    focus_emoji = {'retail': '💰', 'customer': '👥', 'security': '🔒'}
+    st.sidebar.markdown(f"**현재 포커스**: {focus_emoji.get(st.session_state.current_focus, '💰')} {st.session_state.current_focus.title()}")
+    st.sidebar.markdown("---")
+
     return retail_step, customer_step, security_step, st.session_state.current_focus, st.session_state.dark_mode
 
 def route_to_hierarchical_page(retail_step, customer_step, security_step, current_focus, pages):
@@ -456,11 +497,11 @@ def route_to_hierarchical_page(retail_step, customer_step, security_step, curren
         # 현재 포커스된 섹션만 표시
         focus_info = {
             'retail': f"💰 Retail: {retail_step}",
-            'customer': f"👥 Customer: {customer_step}", 
+            'customer': f"👥 Customer: {customer_step}",
             'security': f"🔒 Security: {security_step}"
         }
-        st.info(f"📍 **현재 포커스**: {focus_info[current_focus]}")
-        
+        st.info(f"{focus_info[current_focus]}")
+
         # 포커스된 섹션에 따라 라우팅
         if current_focus == 'retail':
             # 1. Retail Prediction 라우팅
@@ -736,15 +777,6 @@ def main():
         # 2. 페이지 모듈들 안전 로딩
         pages = safe_import_pages()
         
-        # 로딩된 페이지 개수 표시
-        loaded_count = sum(1 for page in pages.values() if page is not None)
-        total_count = len(pages)
-        
-        if loaded_count < total_count:
-            st.warning(f"⚠️ 일부 페이지 로딩 실패: {loaded_count}/{total_count}개 페이지 사용 가능")
-        else:
-            st.success(f"✅ 모든 페이지 로딩 완료: {loaded_count}개 페이지 준비됨")
-        
         # 3. 사이드바 설정 및 페이지 선택
         retail_step, customer_step, security_step, current_focus, dark_mode = setup_simple_sidebar()
         
@@ -753,8 +785,25 @@ def main():
         
         # 4. 선택된 페이지 표시
         route_to_hierarchical_page(retail_step, customer_step, security_step, current_focus, pages)
-        # else:
-        #     st.info("📍 좌쪽 메뉴에서 분석할 페이지를 선택하세요.")
+        
+        # 디버깅 정보 (footer 위로 이동)
+        with st.expander("🔍 디버깅 정보", expanded=False):
+            # 로딩된 페이지 개수 표시
+            loaded_count = sum(1 for page in pages.values() if page is not None)
+            total_count = len(pages)
+            
+            if loaded_count < total_count:
+                st.warning(f"⚠️ 일부 페이지 로딩 실패: {loaded_count}/{total_count}개 페이지 사용 가능")
+            else:
+                st.success(f"✅ 모든 페이지 로딩 완료: {loaded_count}개 페이지 준비됨")
+                
+            # 현재 포커스 정보
+            focus_info = {
+                'retail': f"💰 Retail: {retail_step}",
+                'customer': f"👥 Customer: {customer_step}", 
+                'security': f"🔒 Security: {security_step}"
+            }
+            st.info(f"📍 **현재 포커스**: {focus_info[current_focus]}")
         
         # 5. 푸터 표시
         show_footer()
