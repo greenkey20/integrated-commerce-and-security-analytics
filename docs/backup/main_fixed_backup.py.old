@@ -1,0 +1,47 @@
+def main():
+    """메인 애플리케이션 (계층형 네비게이션)"""
+    try:
+        # 1. 애플리케이션 초기화
+        initialize_app()
+        
+        # 2. 페이지 모듈들 안전 로딩
+        pages = safe_import_pages()
+        
+        # 로딩된 페이지 개수 표시
+        loaded_count = sum(1 for page in pages.values() if page is not None)
+        total_count = len(pages)
+        
+        if loaded_count < total_count:
+            st.warning(f"⚠️ 일부 페이지 로딩 실패: {loaded_count}/{total_count}개 페이지 사용 가능")
+        else:
+            st.success(f"✅ 모든 페이지 로딩 완료: {loaded_count}개 페이지 준비됨")
+        
+        # 3. 계층형 사이드바 설정 및 페이지 선택
+        retail_step, customer_step, security_step = setup_simple_sidebar()
+        
+        # 4. 선택된 페이지 표시 (새로운 라우팅)
+        route_to_hierarchical_page(retail_step, customer_step, security_step, pages)
+        
+        # 5. 푸터 표시
+        show_footer()
+        
+    except Exception as e:
+        st.error("🚨 애플리케이션 시작 중 치명적인 오류가 발생했습니다.")
+        st.error(f"**오류 내용**: {str(e)}")
+        
+        st.markdown("""
+        **🔧 문제 해결 방법:**
+        1. 페이지를 새로고침 (F5)
+        2. 브라우저 캐시 삭제
+        3. 가상환경 및 패키지 재설치 확인
+        4. Python 버전 호환성 확인 (3.8-3.11 권장)
+        """)
+        
+        # 에러 상세 정보 (개발자용)
+        with st.expander("🔍 개발자용 에러 상세"):
+            st.exception(e)
+
+
+# 애플리케이션 진입점
+if __name__ == "__main__":
+    main()

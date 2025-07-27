@@ -63,26 +63,11 @@ def show_retail_analysis_page():
     # 세션 상태 초기화
     initialize_session_state()
     
-    # 사이드바에서 분석 단계 선택
-    setup_sidebar()
+    # 메인 앱에서 추가 단계 선택 버튼 제공 (선택적)
+    show_step_navigation()
     
-    # 선택된 단계에 따른 페이지 렌더링
-    analysis_step = st.session_state.get('analysis_step', "1️⃣ 데이터 로딩 & 품질 분석")
-    
-    if analysis_step == "1️⃣ 데이터 로딩 & 품질 분석":
-        show_data_loading_page()
-    elif analysis_step == "2️⃣ 데이터 정제 & 전처리":
-        show_data_cleaning_page()
-    elif analysis_step == "3️⃣ 특성 공학 & 파생변수":
-        show_feature_engineering_page()
-    elif analysis_step == "4️⃣ 타겟 변수 생성":
-        show_target_creation_page()
-    elif analysis_step == "5️⃣ 선형회귀 모델링":
-        show_modeling_page()
-    elif analysis_step == "6️⃣ 모델 평가 & 해석":
-        show_evaluation_page()
-    elif analysis_step == "📊 전체 분석 요약":
-        show_analysis_summary_page()
+    # 기본적으로 전체 분석 요약 페이지 표시
+    show_analysis_summary_page()
 
 
 def initialize_session_state():
@@ -104,145 +89,9 @@ def initialize_session_state():
             st.session_state[key] = value
 
 
-def setup_sidebar():
-    """사이드바 설정 - 진행 상태 표시 및 메뉴 선택"""
-    
-    st.sidebar.title("📋 분석 단계")
-    
-    # 단계 선택 라디오 버튼
-    analysis_step = st.sidebar.radio(
-        "학습하고 싶은 단계를 선택하세요:",
-        [
-            "1️⃣ 데이터 로딩 & 품질 분석",
-            "2️⃣ 데이터 정제 & 전처리", 
-            "3️⃣ 특성 공학 & 파생변수",
-            "4️⃣ 타겟 변수 생성",
-            "5️⃣ 선형회귀 모델링",
-            "6️⃣ 모델 평가 & 해석",
-            "📊 전체 분석 요약"
-        ]
-    )
-    
-    # 선택된 단계 저장
-    st.session_state.analysis_step = analysis_step
-    
-    # 진행 상태 표시
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("**🎯 학습 진도:**")
-    
-    # 각 단계별 상태 확인
-    progress_steps = [
-        ("1️⃣ 데이터 로딩 & 품질 분석", st.session_state.retail_data_loaded),
-        ("2️⃣ 데이터 정제 & 전처리", st.session_state.retail_data_cleaned),
-        ("3️⃣ 특성 공학 & 파생변수", st.session_state.retail_features_created),
-        ("4️⃣ 타겟 변수 생성", st.session_state.retail_target_created),
-        ("5️⃣ 선형회귀 모델링", st.session_state.retail_model_trained),
-        ("6️⃣ 모델 평가 & 해석", st.session_state.retail_model_evaluated)
-    ]
-    
-    for step_name, completed in progress_steps:
-        icon = "✅" if completed else "⏳"
-        step_text = step_name.split(' ', 1)[1]
-        st.sidebar.markdown(f"{icon} {step_text}")
-    
-    # 현재 선택된 메뉴 강조
-    st.sidebar.markdown("---")
-    st.sidebar.info(f"현재 페이지: **{analysis_step}**")
-    
-    # 전체 진행률 표시
-    completed_steps = sum([
-        st.session_state.retail_data_loaded,
-        st.session_state.retail_data_cleaned,
-        st.session_state.retail_features_created,
-        st.session_state.retail_target_created,
-        st.session_state.retail_model_trained,
-        st.session_state.retail_model_evaluated
-    ])
-    
-    progress_percentage = (completed_steps / 6) * 100
-    st.sidebar.progress(progress_percentage / 100)
-    st.sidebar.caption(f"전체 진행률: {progress_percentage:.0f}%")
-    
-    # 각 단계별 상세 상태
-    with st.sidebar.expander("📊 단계별 상세 상태"):
-        
-        # 데이터 로딩 상태
-        loading_status = get_data_loading_status()
-        st.write(f"**데이터 로딩**: {'✅' if loading_status['data_loaded'] else '⏳'}")
-        if loading_status['data_loaded']:
-            st.caption(f"레코드 수: {loading_status['records_count']:,}개")
-        
-        # 데이터 정제 상태
-        cleaning_status = get_data_cleaning_status()
-        st.write(f"**데이터 정제**: {'✅' if cleaning_status['data_cleaned'] else '⏳'}")
-        if cleaning_status['data_cleaned']:
-            st.caption(f"품질 점수: {cleaning_status['quality_score']}/100")
-        
-        # 특성 공학 상태
-        feature_status = get_feature_engineering_status()
-        st.write(f"**특성 공학**: {'✅' if feature_status['features_created'] else '⏳'}")
-        if feature_status['features_created']:
-            st.caption(f"고객 수: {feature_status['customer_count']:,}명")
-            st.caption(f"특성 수: {feature_status['feature_count']}개")
-        
-        # 타겟 생성 상태
-        target_status = get_target_creation_status()
-        st.write(f"**타겟 생성**: {'✅' if target_status['target_created'] else '⏳'}")
-        if target_status['target_created']:
-            st.caption(f"예측 기간: {target_status['target_months']}개월")
-            st.caption(f"평균 예측: £{target_status['avg_prediction']:.2f}")
-        
-        # 모델링 상태
-        modeling_status = get_modeling_status()
-        st.write(f"**모델링**: {'✅' if modeling_status['model_trained'] else '⏳'}")
-        if modeling_status['model_trained']:
-            st.caption(f"R² 점수: {modeling_status['r2_score']:.3f}")
-        
-        # 평가 상태
-        evaluation_status = get_evaluation_status()
-        st.write(f"**모델 평가**: {'✅' if evaluation_status['model_evaluated'] else '⏳'}")
-        if evaluation_status['model_evaluated']:
-            st.caption(f"상대오차: {evaluation_status['relative_error']:.1f}%")
-    
-    # 사용 가이드
-    with st.sidebar.expander("💡 사용 가이드"):
-        st.markdown("""
-        **🚀 Online Retail 분석 단계:**
-        
-        1. **데이터 로딩**: UCI 데이터셋 로딩 및 품질 분석
-        2. **데이터 정제**: 결측값, 이상치 처리 및 파생변수 생성
-        3. **특성 공학**: 고객별 RFM 분석 및 행동 패턴 분석
-        4. **타겟 생성**: 미래 구매 예측을 위한 타겟 변수 설계
-        5. **모델 훈련**: 선형회귀 모델 훈련 및 성능 평가
-        6. **모델 해석**: 비즈니스 관점에서의 모델 해석
-        
-        **💡 팁:**
-        - 순차적으로 진행하는 것을 권장합니다
-        - 각 단계의 결과는 자동으로 저장됩니다
-        - 언제든지 이전 단계로 돌아갈 수 있습니다
-        
-        **🔧 리팩토링 효과:**
-        - 각 페이지가 독립적으로 작동
-        - 코드 유지보수성 대폭 향상
-        - 개별 기능 테스트 및 디버깅 용이
-        """)
-    
-    # 빠른 액션
-    st.sidebar.markdown("---")
-    st.sidebar.markdown("**⚡ 빠른 액션**")
-    
-    if st.sidebar.button("🔄 전체 초기화"):
-        # 모든 상태 초기화
-        keys_to_clear = [key for key in st.session_state.keys() if key.startswith('retail_')]
-        for key in keys_to_clear:
-            del st.session_state[key]
-        st.sidebar.success("초기화 완료!")
-        safe_rerun()
-    
-    if completed_steps == 6:
-        if st.sidebar.button("📊 분석 요약 보기"):
-            st.session_state.analysis_step = "📊 전체 분석 요약"
-            safe_rerun()
+def show_step_navigation():
+    """메인 콘텐츠 영역에서 추가 단계 선택 버튼 제공 (선택적)"""
+    st.info("📍 이 페이지는 main_app.py의 새로운 계층형 네비게이션으로 관리됩니다.")
 
 
 def show_analysis_summary_page():
