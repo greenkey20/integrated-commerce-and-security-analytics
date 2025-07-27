@@ -51,6 +51,16 @@ sys.path.insert(0, os.path.join(current_dir, "web"))
 # 설정 및 유틸리티 모듈
 from config.settings import AppConfig, UIConfig
 
+# UI 컴포넌트 (새로 추가)
+try:
+    from utils.ui_components import (
+        create_metric_card, create_section_header, create_info_box,
+        create_progress_card, get_green_colors, style_plotly_chart
+    )
+    UI_COMPONENTS_AVAILABLE = True
+except ImportError:
+    UI_COMPONENTS_AVAILABLE = False
+
 # 한글 폰트 설정 (간단 버전)
 def setup_simple_korean_font():
     """간단한 한글 폰트 설정"""
@@ -181,76 +191,7 @@ def initialize_app():
     # 한글 폰트 설정
     setup_simple_korean_font()
     
-    # Green Theme CSS (Light Mode 전용)
-    st.markdown("""
-    <style>
-    .stApp {
-        background: linear-gradient(180deg, #F8FAFC 0%, #F0FDFA 100%) !important;
-        color: #064E3B !important;
-    }
-    .css-1d391kg {
-        background: linear-gradient(180deg, #F0FDF4 0%, #ECFDF5 100%) !important;
-    }
-    .main .block-container {
-        background: rgba(255, 255, 255, 0.95) !important;
-        color: #064E3B !important;
-        border: 1px solid rgba(34, 197, 94, 0.2) !important;
-        border-radius: 16px !important;
-        padding: 2rem !important;
-        margin-top: 1rem !important;
-    }
-    [data-testid="metric-container"] {
-        background: linear-gradient(135deg, #FFFFFF, #F0FDF4) !important;
-        border: 1px solid #BBF7D0 !important;
-        color: #064E3B !important;
-        border-radius: 12px !important;
-        padding: 1rem !important;
-    }
-    .stSuccess { 
-        background: #F0FDF4 !important; 
-        border: 1px solid #BBF7D0 !important; 
-        color: #064E3B !important; 
-    }
-    .stWarning { 
-        background: #FFFBEB !important; 
-        border: 1px solid #FDE68A !important; 
-        color: #92400E !important; 
-    }
-    .stError { 
-        background: #FEF2F2 !important; 
-        border: 1px solid #FECACA !important; 
-        color: #991B1B !important; 
-    }
-    .stInfo { 
-        background: #F0F9FF !important; 
-        border: 1px solid #BAE6FD !important; 
-        color: #0C4A6E !important; 
-    }
-    
-    /* 모든 텍스트 요소 색상 강제 지정 */
-    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
-        color: #064E3B !important;
-        font-weight: 600 !important;
-    }
-    .main p, .main div, .main span, .main label, .main li {
-        color: #374151 !important;
-    }
-    .main a { color: #059669 !important; }
-    .main a:hover { color: #047857 !important; }
-    
-    /* 사이드바 스타일링 */
-    .css-1d391kg .stSelectbox > div > div {
-        background: #FFFFFF !important;
-        border: 1px solid #D1FAE5 !important;
-    }
-    
-    /* Plotly 차트 배경 */
-    .js-plotly-plot, .plotly {
-        background: rgba(255, 255, 255, 0.95) !important;
-        border-radius: 8px !important;
-    }
-    </style>
-    """, unsafe_allow_html=True)
+    # Green Theme CSS는 apply_theme_css()에서 동적으로 적용됨
     
     # 제목 및 소개
     st.title("🌿 Integrated Commerce & Security Analytics")
@@ -262,6 +203,157 @@ def initialize_app():
     **버전**: v3.0 - 통합 분석 플랫폼 (Simple Edition)
     """)
 
+def apply_theme_css(dark_mode=False):
+    """다크 모드 또는 라이트 모드 CSS 동적 적용"""
+    
+    if dark_mode:
+        # 🌙 Dark Mode Green Theme
+        st.markdown("""
+        <style>
+        .stApp {
+            background: linear-gradient(180deg, #0F172A 0%, #1E293B 100%) !important;
+            color: #A7F3D0 !important;
+        }
+        .css-1d391kg {
+            background: linear-gradient(180deg, #1F2937 0%, #111827 100%) !important;
+        }
+        .main .block-container {
+            background: rgba(31, 41, 55, 0.95) !important;
+            color: #A7F3D0 !important;
+            border: 1px solid rgba(34, 197, 94, 0.3) !important;
+            border-radius: 16px !important;
+            padding: 2rem !important;
+            margin-top: 1rem !important;
+        }
+        [data-testid="metric-container"] {
+            background: linear-gradient(135deg, #374151, #1F2937) !important;
+            border: 1px solid #16A34A !important;
+            color: #A7F3D0 !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+        }
+        .stSuccess { 
+            background: #064E3B !important; 
+            border: 1px solid #16A34A !important; 
+            color: #A7F3D0 !important; 
+        }
+        .stWarning { 
+            background: #451A03 !important; 
+            border: 1px solid #F59E0B !important; 
+            color: #FDE68A !important; 
+        }
+        .stError { 
+            background: #450A0A !important; 
+            border: 1px solid #EF4444 !important; 
+            color: #FECACA !important; 
+        }
+        .stInfo { 
+            background: #0C4A6E !important; 
+            border: 1px solid #3B82F6 !important; 
+            color: #DBEAFE !important; 
+        }
+        
+        /* 모든 텍스트 요소 색상 */
+        .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
+            color: #A7F3D0 !important;
+            font-weight: 600 !important;
+        }
+        .main p, .main div, .main span, .main label, .main li {
+            color: #D1D5DB !important;
+        }
+        .main a { color: #34D399 !important; }
+        .main a:hover { color: #10B981 !important; }
+        
+        /* 사이드바 스타일링 */
+        .css-1d391kg .stSelectbox > div > div {
+            background: #374151 !important;
+            border: 1px solid #16A34A !important;
+            color: #D1D5DB !important;
+        }
+        .css-1d391kg .stToggle > div {
+            background: #374151 !important;
+        }
+        
+        /* Plotly 차트 배경 */
+        .js-plotly-plot, .plotly {
+            background: rgba(31, 41, 55, 0.95) !important;
+            border-radius: 8px !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+    
+    else:
+        # ☀️ Light Mode Green Theme
+        st.markdown("""
+        <style>
+        .stApp {
+            background: linear-gradient(180deg, #F8FAFC 0%, #F0FDFA 100%) !important;
+            color: #064E3B !important;
+        }
+        .css-1d391kg {
+            background: linear-gradient(180deg, #F0FDF4 0%, #ECFDF5 100%) !important;
+        }
+        .main .block-container {
+            background: rgba(255, 255, 255, 0.95) !important;
+            color: #064E3B !important;
+            border: 1px solid rgba(34, 197, 94, 0.2) !important;
+            border-radius: 16px !important;
+            padding: 2rem !important;
+            margin-top: 1rem !important;
+        }
+        [data-testid="metric-container"] {
+            background: linear-gradient(135deg, #FFFFFF, #F0FDF4) !important;
+            border: 1px solid #BBF7D0 !important;
+            color: #064E3B !important;
+            border-radius: 12px !important;
+            padding: 1rem !important;
+        }
+        .stSuccess { 
+            background: #F0FDF4 !important; 
+            border: 1px solid #BBF7D0 !important; 
+            color: #064E3B !important; 
+        }
+        .stWarning { 
+            background: #FFFBEB !important; 
+            border: 1px solid #FDE68A !important; 
+            color: #92400E !important; 
+        }
+        .stError { 
+            background: #FEF2F2 !important; 
+            border: 1px solid #FECACA !important; 
+            color: #991B1B !important; 
+        }
+        .stInfo { 
+            background: #F0F9FF !important; 
+            border: 1px solid #BAE6FD !important; 
+            color: #0C4A6E !important; 
+        }
+        
+        /* 모든 텍스트 요소 색상 */
+        .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
+            color: #064E3B !important;
+            font-weight: 600 !important;
+        }
+        .main p, .main div, .main span, .main label, .main li {
+            color: #374151 !important;
+        }
+        .main a { color: #059669 !important; }
+        .main a:hover { color: #047857 !important; }
+        
+        /* 사이드바 스타일링 */
+        .css-1d391kg .stSelectbox > div > div {
+            background: #FFFFFF !important;
+            border: 1px solid #D1FAE5 !important;
+        }
+        
+        /* Plotly 차트 배경 */
+        .js-plotly-plot, .plotly {
+            background: rgba(255, 255, 255, 0.95) !important;
+            border-radius: 8px !important;
+        }
+        </style>
+        """, unsafe_allow_html=True)
+
 def setup_simple_sidebar():
     """계층형 네비게이션 (Business Intelligence + Security Analytics)"""
     st.sidebar.title("📋 Navigation")
@@ -269,6 +361,24 @@ def setup_simple_sidebar():
     # 세션 상태 초기화
     if 'current_focus' not in st.session_state:
         st.session_state.current_focus = 'retail'
+    if 'dark_mode' not in st.session_state:
+        st.session_state.dark_mode = False
+    
+    # 🌙 Dark Mode 토글 (상단에 추가)
+    st.sidebar.markdown("---")
+    dark_mode = st.sidebar.toggle(
+        "🌙 Dark Mode",
+        value=st.session_state.dark_mode,
+        key="dark_mode_toggle",
+        help="어둠의 힘을 사용하여 눈의 피로를 줄이고 배터리를 절약하세요."
+    )
+    
+    # Dark Mode 상태 업데이트
+    if dark_mode != st.session_state.dark_mode:
+        st.session_state.dark_mode = dark_mode
+        st.rerun()
+    
+    st.sidebar.markdown("---")
     
     # A. Business Intelligence 섹션
     st.sidebar.markdown("### 📊 **A. Business Intelligence**")
@@ -337,7 +447,7 @@ def setup_simple_sidebar():
     if st.sidebar.button("🔄 새로고침", key="refresh"):
         st.rerun()
     
-    return retail_step, customer_step, security_step, st.session_state.current_focus
+    return retail_step, customer_step, security_step, st.session_state.current_focus, st.session_state.dark_mode
 
 def route_to_hierarchical_page(retail_step, customer_step, security_step, current_focus, pages):
     """계층형 네비게이션 라우팅 (포커스 기반)"""
@@ -636,7 +746,10 @@ def main():
             st.success(f"✅ 모든 페이지 로딩 완료: {loaded_count}개 페이지 준비됨")
         
         # 3. 사이드바 설정 및 페이지 선택
-        retail_step, customer_step, security_step, current_focus = setup_simple_sidebar()
+        retail_step, customer_step, security_step, current_focus, dark_mode = setup_simple_sidebar()
+        
+        # Dark Mode CSS 동적 적용
+        apply_theme_css(dark_mode)
         
         # 4. 선택된 페이지 표시
         route_to_hierarchical_page(retail_step, customer_step, security_step, current_focus, pages)

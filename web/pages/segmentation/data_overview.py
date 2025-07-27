@@ -12,6 +12,17 @@ import plotly.express as px
 import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
+# Green Theme UI 컴포넌트 import
+try:
+    from utils.ui_components import (
+        create_metric_card, create_section_header, create_info_box,
+        get_green_colors, style_plotly_chart
+    )
+    UI_COMPONENTS_AVAILABLE = True
+except ImportError:
+    UI_COMPONENTS_AVAILABLE = False
+    st.warning("⚠️ UI 컴포넌트를 로드할 수 없습니다. 기본 UI를 사용합니다.")
+
 
 def get_data_processor():
     """데이터 프로세서 초기화 - 안전한 폴백 메커니즘"""
@@ -50,7 +61,19 @@ def create_sample_data():
 
 def show_data_overview_page():
     """고객 데이터 개요 페이지 메인 함수"""
-    st.header("📊 고객 데이터 개요 및 분석")
+    # Dark Mode 상태 확인
+    dark_mode = st.session_state.get('dark_mode', False)
+    
+    # Green Theme 섹션 헤더 적용
+    if UI_COMPONENTS_AVAILABLE:
+        create_section_header(
+            "고객 데이터 개요 및 분석", 
+            "Mall Customer 데이터셋의 전체적인 구조와 특성을 파악합니다",
+            "📊",
+            dark_mode=dark_mode
+        )
+    else:
+        st.header("📊 고객 데이터 개요 및 분석")
 
     # 데이터 프로세서 초기화
     data_processor, status = get_data_processor()
@@ -122,22 +145,47 @@ def get_validation_results(data, data_processor):
 
 def show_basic_info(data, validation_results):
     """기본 데이터셋 정보 표시"""
-    st.subheader("📋 데이터셋 기본 정보")
+    dark_mode = st.session_state.get('dark_mode', False)
+    
+    if UI_COMPONENTS_AVAILABLE:
+        create_section_header(
+            "데이터셋 기본 정보", 
+            "데이터의 규모와 구성을 한눈에 파악하세요",
+            "📋",
+            dark_mode=dark_mode
+        )
+    else:
+        st.subheader("📋 데이터셋 기본 정보")
 
     col1, col2, col3, col4 = st.columns(4)
 
     with col1:
-        st.metric("전체 고객 수", f"{validation_results['total_rows']:,}명")
+        if UI_COMPONENTS_AVAILABLE:
+            create_metric_card("전체 고객 수", f"{validation_results['total_rows']:,}명", "+100% 데이터 품질", "green", dark_mode)
+        else:
+            st.metric("전체 고객 수", f"{validation_results['total_rows']:,}명")
+            
     with col2:
-        st.metric("특성 수", f"{validation_results['total_columns']}개")
+        if UI_COMPONENTS_AVAILABLE:
+            create_metric_card("특성 수", f"{validation_results['total_columns']}개", "전체 컨럼", "teal", dark_mode)
+        else:
+            st.metric("특성 수", f"{validation_results['total_columns']}개")
+            
     with col3:
         numeric_count = validation_results.get('numeric_columns',
                                                len(data.select_dtypes(include=[np.number]).columns))
-        st.metric("수치형 특성", f"{numeric_count}개")
+        if UI_COMPONENTS_AVAILABLE:
+            create_metric_card("수치형 특성", f"{numeric_count}개", "분석 가능", "lime", dark_mode)
+        else:
+            st.metric("수치형 특성", f"{numeric_count}개")
+            
     with col4:
         categorical_count = validation_results.get('categorical_columns',
                                                    len(data.select_dtypes(exclude=[np.number]).columns))
-        st.metric("범주형 특성", f"{categorical_count}개")
+        if UI_COMPONENTS_AVAILABLE:
+            create_metric_card("범주형 특성", f"{categorical_count}개", "카테고리", "green", dark_mode)
+        else:
+            st.metric("범주형 특성", f"{categorical_count}개")
 
     # 데이터 타입 정보 (확장 가능한 섹션)
     with st.expander("📊 컬럼별 상세 정보"):
@@ -152,7 +200,17 @@ def show_basic_info(data, validation_results):
 
 def show_data_quality_check(data, validation_results):
     """데이터 품질 검사 결과"""
-    st.subheader("🔍 데이터 품질 검사")
+    dark_mode = st.session_state.get('dark_mode', False)
+    
+    if UI_COMPONENTS_AVAILABLE:
+        create_section_header(
+            "데이터 품질 검사", 
+            "데이터의 결측값, 중복값, 이상치를 철저히 검사합니다",
+            "🔍",
+            dark_mode=dark_mode
+        )
+    else:
+        st.subheader("🔍 데이터 품질 검사")
 
     col1, col2 = st.columns(2)
 
@@ -251,7 +309,12 @@ def show_data_distribution(data):
             subplot_titles=numeric_cols
         )
 
-        colors = ['#FF6B6B', '#4ECDC4', '#45B7D1', '#96CEB4', '#FFEAA7', '#DDA0DD']
+        # Green Theme 색상 팬레트 적용
+        dark_mode = st.session_state.get('dark_mode', False)
+        if UI_COMPONENTS_AVAILABLE:
+            colors = get_green_colors(dark_mode)
+        else:
+            colors = ['#22C55E', '#10B981', '#14B8A6', '#84CC16', '#059669', '#0D9488']
 
         for i, col in enumerate(numeric_cols):
             row = i // n_cols + 1
@@ -271,6 +334,11 @@ def show_data_distribution(data):
             height=400 * n_rows,
             title_text="고객 특성별 분포"
         )
+        
+        # Green Theme 스타일 적용
+        if UI_COMPONENTS_AVAILABLE:
+            fig = style_plotly_chart(fig, dark_mode, "고객 특성별 분포")
+            
         st.plotly_chart(fig, use_container_width=True)
 
     # 범주형 데이터 분포
@@ -294,12 +362,25 @@ def show_categorical_visualizations(data):
             with col1:
                 # 파이 차트
                 value_counts = data[col].value_counts()
+                dark_mode = st.session_state.get('dark_mode', False)
+                
+                # Green Theme 색상 적용
+                if UI_COMPONENTS_AVAILABLE:
+                    color_seq = get_green_colors(dark_mode)
+                else:
+                    color_seq = ['#22C55E', '#10B981', '#14B8A6', '#84CC16']
+                    
                 fig = px.pie(
                     values=value_counts.values,
                     names=value_counts.index,
                     title=f"{col} 분포",
-                    color_discrete_sequence=px.colors.qualitative.Set3
+                    color_discrete_sequence=color_seq
                 )
+                
+                # Green Theme 스타일 적용
+                if UI_COMPONENTS_AVAILABLE:
+                    fig = style_plotly_chart(fig, dark_mode, f"{col} 분포")
+                    
                 st.plotly_chart(fig, use_container_width=True)
 
             with col2:
@@ -308,8 +389,14 @@ def show_categorical_visualizations(data):
                     x=value_counts.index,
                     y=value_counts.values,
                     title=f"{col} 개수",
-                    labels={'x': col, 'y': '개수'}
+                    labels={'x': col, 'y': '개수'},
+                    color_discrete_sequence=color_seq
                 )
+                
+                # Green Theme 스타일 적용
+                if UI_COMPONENTS_AVAILABLE:
+                    fig = style_plotly_chart(fig, dark_mode, f"{col} 개수")
+                    
                 st.plotly_chart(fig, use_container_width=True)
 
 
@@ -332,16 +419,26 @@ def show_correlation_analysis(data):
 
     with col1:
         # 히트맵
+        dark_mode = st.session_state.get('dark_mode', False)
+        
+        # Green Theme 색상 스케일 적용
+        color_scale = 'Greens' if not dark_mode else 'RdYlGn'
+        
         fig = px.imshow(
             correlation_matrix,
             labels=dict(color="상관계수"),
             title="상관관계 히트맵",
-            color_continuous_scale='RdBu_r',
+            color_continuous_scale=color_scale,
             aspect="auto",
             text_auto=True
         )
 
         fig.update_layout(height=400)
+        
+        # Green Theme 스타일 적용
+        if UI_COMPONENTS_AVAILABLE:
+            fig = style_plotly_chart(fig, dark_mode, "상관관계 히트맵")
+            
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
@@ -492,11 +589,25 @@ def show_basic_segmentation(data):
     col1, col2 = st.columns(2)
 
     with col1:
+        dark_mode = st.session_state.get('dark_mode', False)
+        
+        # Green Theme 색상 적용
+        if UI_COMPONENTS_AVAILABLE:
+            color_seq = get_green_colors(dark_mode)
+        else:
+            color_seq = ['#22C55E', '#10B981', '#14B8A6', '#84CC16', '#059669']
+            
         fig = px.pie(
             values=segment_counts.values,
             names=segment_counts.index,
-            title="고객 세그먼트 분포"
+            title="고객 세그먼트 분포",
+            color_discrete_sequence=color_seq
         )
+        
+        # Green Theme 스타일 적용
+        if UI_COMPONENTS_AVAILABLE:
+            fig = style_plotly_chart(fig, dark_mode, "고객 세그먼트 분포")
+            
         st.plotly_chart(fig, use_container_width=True)
 
     with col2:
