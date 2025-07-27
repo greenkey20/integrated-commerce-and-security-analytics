@@ -395,9 +395,7 @@ def apply_theme_css(dark_mode=False):
         """, unsafe_allow_html=True)
 
 def setup_simple_sidebar():
-    """계층형 네비게이션 (Business Intelligence + Security Analytics)"""
-    # st.sidebar.title("📋 Navigation")
-    
+    """탭 스타일 네비게이션"""
     # 세션 상태 초기화
     if 'current_focus' not in st.session_state:
         st.session_state.current_focus = 'retail'
@@ -405,7 +403,6 @@ def setup_simple_sidebar():
         st.session_state.dark_mode = False
     
     # 🌙 Dark Mode 토글 (상단에 추가)
-    # st.sidebar.markdown("---")
     dark_mode = st.sidebar.toggle(
         "🌙 Dark Mode",
         value=st.session_state.dark_mode,
@@ -418,72 +415,93 @@ def setup_simple_sidebar():
         st.session_state.dark_mode = dark_mode
         st.rerun()
     
-    # st.sidebar.markdown("---")
+    st.sidebar.markdown("---")
     
     # A. Business Intelligence 섹션
     st.sidebar.markdown("### 📊 **A. Business Intelligence**")
     
-    # 1. Retail Prediction
-    st.sidebar.markdown("#### 💰 **1. Retail Prediction**")
-    retail_step = st.sidebar.selectbox(
-        "단계 선택:",
-        [
-            "1️⃣ 데이터 로딩 및 개요",
-            "2️⃣ 데이터 정제 & 전처리", 
-            "3️⃣ 특성공학 & 파생변수 생성",
-            "4️⃣ 타겟변수 생성",
-            "5️⃣ 선형회귀 모델링",
-            "6️⃣ 모델 평가 & 해석",
-            "📊 전체 분석 요약"
-        ],
-        key="retail_step_select",
-        on_change=lambda: setattr(st.session_state, 'current_focus', 'retail')
-    )
+    # 탭 스타일 버튼들 (2개)
+    col1, col2 = st.sidebar.columns(2)
     
-    # 2. Customer Segmentation  
-    st.sidebar.markdown("#### 👥 **2. Customer Segmentation**")
-    customer_step = st.sidebar.selectbox(
-        "단계 선택:",
-        [
-            "1️⃣ 데이터 로딩 및 개요",
-            "2️⃣ 탐색적 데이터 분석",
-            "3️⃣ 클러스터링 분석", 
-            "4️⃣ 주성분 분석",
-            "5️⃣ 딥러닝 분석",
-            "6️⃣ customer segmentation 예측",
-            "7️⃣ 마케팅 전략"
-        ],
-        key="customer_step_select",
-        on_change=lambda: setattr(st.session_state, 'current_focus', 'customer')
-    )
+    with col1:
+        if st.button("💰\n1. Retail\nPrediction", key="tab_retail", 
+                    type="primary" if st.session_state.current_focus == 'retail' else "secondary",
+                    use_container_width=True):
+            st.session_state.current_focus = 'retail'
+    
+    with col2:
+        if st.button("👥\n2. Customer\nSegmentation", key="tab_customer",
+                    type="primary" if st.session_state.current_focus == 'customer' else "secondary",
+                    use_container_width=True):
+            st.session_state.current_focus = 'customer'
     
     # B. Security Analytics 섹션
-    # st.sidebar.markdown("---")
     st.sidebar.markdown("### 🛡️ **B. Security Analytics**")
     
-    # 1. 네트워크 보안 이상 탐지 분석
-    st.sidebar.markdown("#### 🔒 **1. 네트워크 보안 이상 탐지 분석**")
-    security_step = st.sidebar.selectbox(
-        "단계 선택:",
-        [
-            "1️⃣ 데이터 로딩 및 개요",
-            "2️⃣ 탐색적 데이터 분석",
-            "3️⃣ 공격 패턴 심화 분석",
-            "4️⃣ 딥러닝 모델링",
-            "5️⃣ Overfitting 해결 검증",
-            "6️⃣ 실시간 예측 테스트",
-            "7️⃣ 종합 성능 평가"
-        ],
-        key="security_step_select",
-        on_change=lambda: setattr(st.session_state, 'current_focus', 'security')
-    )
+    # 탭 스타일 버튼 (1개)
+    if st.sidebar.button("🔒 1. 네트워크 보안 이상 탐지 분석", key="tab_security",
+                        type="primary" if st.session_state.current_focus == 'security' else "secondary",
+                        use_container_width=True):
+        st.session_state.current_focus = 'security'
     
     st.sidebar.markdown("---")
+    
+    # 현재 포커스된 섹션의 selectbox만 표시
+    retail_step = customer_step = security_step = None
+    
+    if st.session_state.current_focus == 'retail':
+        st.sidebar.markdown("**💰 Retail Prediction**")
+        retail_step = st.sidebar.selectbox(
+            "단계 선택:",
+            [
+                "1️⃣ 데이터 로딩 및 개요",
+                "2️⃣ 데이터 정제 & 전처리", 
+                "3️⃣ 특성공학 & 파생변수 생성",
+                "4️⃣ 타겟변수 생성",
+                "5️⃣ 선형회귀 모델링",
+                "6️⃣ 모델 평가 & 해석",
+                "📊 전체 분석 요약"
+            ],
+            key="retail_step_select"
+        )
+        
+    elif st.session_state.current_focus == 'customer':
+        st.sidebar.markdown("**👥 Customer Segmentation**")
+        customer_step = st.sidebar.selectbox(
+            "단계 선택:",
+            [
+                "1️⃣ 데이터 로딩 및 개요",
+                "2️⃣ 탐색적 데이터 분석",
+                "3️⃣ 클러스터링 분석", 
+                "4️⃣ 주성분 분석",
+                "5️⃣ 딥러닝 분석",
+                "6️⃣ customer segmentation 예측",
+                "7️⃣ 마케팅 전략"
+            ],
+            key="customer_step_select"
+        )
+        
+    elif st.session_state.current_focus == 'security':
+        st.sidebar.markdown("**🔒 네트워크 보안 이상 탐지 분석**")
+        security_step = st.sidebar.selectbox(
+            "단계 선택:",
+            [
+                "1️⃣ 데이터 로딩 및 개요",
+                "2️⃣ 탐색적 데이터 분석",
+                "3️⃣ 공격 패턴 심화 분석",
+                "4️⃣ 딥러닝 모델링",
+                "5️⃣ Overfitting 해결 검증",
+                "6️⃣ 실시간 예측 테스트",
+                "7️⃣ 종합 성능 평가"
+            ],
+            key="security_step_select"
+        )
+    
     # 빠른 액션
     if st.sidebar.button("🔄 새로고침", key="refresh"):
         st.rerun()
     
-    # 현재 포커스 표시 (새로고침 버튼 아래로 이동)
+    # 현재 포커스 표시
     focus_emoji = {'retail': '💰', 'customer': '👥', 'security': '🔒'}
     st.sidebar.markdown(f"**현재 포커스**: {focus_emoji.get(st.session_state.current_focus, '💰')} {st.session_state.current_focus.title()}")
     st.sidebar.markdown("---")
