@@ -22,12 +22,15 @@ class FontManager:
     def setup_korean_font(_self):
         """Streamlit용 한글 폰트 설정 (캐싱 적용)"""
         
-        # 진단에서 확인된 신뢰할 수 있는 폰트들
+        # 진단에서 확인된 신뢰할 수 있는 폰트들 (Windows + macOS)
         reliable_fonts = [
-            {
-                "name": "AppleGothic",
-                "path": "/System/Library/Fonts/Supplemental/AppleGothic.ttf",
-            },
+            # Windows 폰트
+            {"name": "Malgun Gothic", "path": "C:/Windows/Fonts/malgun.ttf"},
+            {"name": "Gulim", "path": "C:/Windows/Fonts/gulim.ttc"},
+            {"name": "Dotum", "path": "C:/Windows/Fonts/dotum.ttc"},
+            {"name": "Batang", "path": "C:/Windows/Fonts/batang.ttc"},
+            # macOS 폰트
+            {"name": "AppleGothic", "path": "/System/Library/Fonts/Supplemental/AppleGothic.ttf"},
             {"name": "Arial Unicode MS", "path": "/Library/Fonts/Arial Unicode.ttf"},
             {"name": "Helvetica", "path": "/System/Library/Fonts/Helvetica.ttc"},
         ]

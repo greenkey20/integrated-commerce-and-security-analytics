@@ -55,13 +55,57 @@ def initialize_app():
     font_manager = FontManager()
     font_manager.setup_korean_font()
     
+    # Green Theme CSS 추가 (Light Mode 강제 적용)
+    st.markdown("""
+    <style>
+    /* 강제 Light Mode (모든 요소에 !important) */
+    .stApp {
+        background: linear-gradient(180deg, #F8FAFC 0%, #F0FDFA 100%) !important;
+        color: #064E3B !important;
+    }
+    .css-1d391kg {
+        background: linear-gradient(180deg, #F0FDF4 0%, #ECFDF5 100%) !important;
+    }
+    .main .block-container {
+        background: rgba(255, 255, 255, 0.98) !important;
+        color: #064E3B !important;
+        border: 1px solid rgba(34, 197, 94, 0.15) !important;
+        border-radius: 16px !important;
+    }
+    [data-testid="metric-container"] {
+        background: linear-gradient(135deg, #FFFFFF, #F0FDF4) !important;
+        border: 1px solid #BBF7D0 !important;
+        color: #064E3B !important;
+        border-radius: 12px !important;
+    }
+    .stSuccess { background: #F0FDF4 !important; border: 1px solid #BBF7D0 !important; color: #064E3B !important; }
+    .stWarning { background: #FFFBEB !important; border: 1px solid #FDE68A !important; color: #92400E !important; }
+    .stError { background: #FEF2F2 !important; border: 1px solid #FECACA !important; color: #991B1B !important; }
+    
+    /* 모든 텍스트 요소 강제 색상 지정 */
+    .main h1, .main h2, .main h3, .main h4, .main h5, .main h6 {
+        color: #064E3B !important;
+        font-weight: 600 !important;
+    }
+    .main p, .main div, .main span, .main label, .main li {
+        color: #374151 !important;
+    }
+    .main a { color: #059669 !important; }
+    .main a:hover { color: #047857 !important; }
+    
+    /* Plotly 차트 배경 강제 지정 */
+    .js-plotly-plot, .plotly {
+        background: rgba(255, 255, 255, 0.95) !important;
+    }
+    </style>
+    """, unsafe_allow_html=True)
+    
     # 제목 및 소개
     st.title(AppConfig.APP_TITLE)
     st.markdown(f"""
-    이 애플리케이션은 K-means 클러스터링을 활용하여 쇼핑몰 고객을 세분화하고 
-    각 그룹별 특성을 분석하여 맞춤형 마케팅 전략을 제공합니다.
+    {AppConfig.APP_DESCRIPTION}
     
-    **버전**: {AppConfig.VERSION} - 딥러닝 지원
+    **버전**: {AppConfig.VERSION}
     """)
 
 

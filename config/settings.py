@@ -7,10 +7,12 @@
 
 class AppConfig:
     """애플리케이션 전체 설정"""
-    APP_TITLE = "Mall Customer Segmentation Analysis"
-    APP_ICON = "🛍️"
+    APP_TITLE = "🌿 Integrated Commerce & Security Analytics"
+    APP_SUBTITLE = "차세대 이커머스를 위한 통합 인텔리전스 플랫폼"
+    APP_DESCRIPTION = "고객 인사이트부터 보안 모니터링까지, 데이터 기반 비즈니스 성장을 지원합니다."
+    APP_ICON = "🌿"
     LAYOUT = "wide"
-    VERSION = "v2.0"
+    VERSION = "v3.0 - 통합 분석 플랫폼"
     
     # 데이터 관련 설정
     DATA_URL = "https://raw.githubusercontent.com/tirthajyoti/Machine-Learning-with-Python/master/Datasets/Mall_Customers.csv"
