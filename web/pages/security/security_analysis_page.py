@@ -43,6 +43,65 @@ from data.loaders.unified_security_loader import (
     check_cicids_data_availability
 )
 
+def create_streamlit_progress_callback(total_epochs=50):
+    """스트림릿용 진행률 콜백 생성"""
+    if not TF_AVAILABLE:
+        return None
+    
+    # 전역 변수로 사용할 컴포넌트들
+    progress_components = {
+        'progress_bar': st.progress(0),
+        'status_text': st.empty(),
+        'metrics_container': st.empty()
+    }
+    
+    class StreamlitProgressCallback(tf.keras.callbacks.Callback):
+        def __init__(self, total_epochs=50, components=None):
+            super().__init__()
+            self.total_epochs = total_epochs
+            self.current_epoch = 0
+            self.components = components or progress_components
+        
+        def on_train_begin(self, logs=None):
+            self.components['status_text'].text("🚀 모델 훈련을 시작합니다...")
+            self.components['progress_bar'].progress(0)
+        
+        def on_epoch_begin(self, epoch, logs=None):
+            self.current_epoch = epoch + 1
+            self.components['status_text'].text(f"📈 Epoch {self.current_epoch}/{self.total_epochs} 훈련 중...")
+        
+        def on_epoch_end(self, epoch, logs=None):
+            logs = logs or {}
+            progress = (epoch + 1) / self.total_epochs
+            self.components['progress_bar'].progress(progress)
+            
+            # 실시간 메트릭 표시
+            with self.components['metrics_container'].container():
+                col1, col2, col3, col4 = st.columns(4)
+                with col1:
+                    st.metric("Loss", f"{logs.get('loss', 0.0):.4f}")
+                with col2:
+                    st.metric("Accuracy", f"{logs.get('accuracy', 0.0):.4f}")
+                with col3:
+                    if 'val_loss' in logs:
+                        st.metric("Val Loss", f"{logs.get('val_loss', 0.0):.4f}")
+                with col4:
+                    if 'val_accuracy' in logs:
+                        st.metric("Val Accuracy", f"{logs.get('val_accuracy', 0.0):.4f}")
+            
+            self.components['status_text'].text(
+                f"✅ Epoch {epoch + 1}/{self.total_epochs} 완료 - "
+                f"Loss: {logs.get('loss', 0.0):.4f}, "
+                f"Accuracy: {logs.get('accuracy', 0.0):.4f}"
+            )
+        
+        def on_train_end(self, logs=None):
+            self.components['progress_bar'].progress(1.0)
+            self.components['status_text'].text("🎉 모델 훈련이 완료되었습니다!")
+    
+    return StreamlitProgressCallback(total_epochs, progress_components)
+
+
 def show_security_analysis_page():
     """CICIDS2017 보안 이상 탐지 분석 페이지"""
     st.header("🔒 CICIDS2017 네트워크 이상 탐지 분석")
@@ -107,11 +166,11 @@ def load_real_cicids_data():
     """실제 CICIDS2017 데이터 로드"""
     from data.loaders.cicids_working_files_loader import WorkingCICIDSLoader
     
-    data_dir = "C:/keydev/customer-segmentation-analysis/data/cicids2017"
+    data_dir = "C:/keydev/integrated-commerce-and-security-analytics/data/cicids2017"
     loader = WorkingCICIDSLoader(data_dir)
     
-    # 대용량 데이터 로드 (20만 개)
-    dataset = loader.load_working_files(target_samples=200000)
+    # 대용량 데이터 로드 (30만 개)
+    dataset = loader.load_working_files(target_samples=300000)
     
     st.session_state.cicids_data = dataset
     st.success(f"✅ 실제 CICIDS2017 데이터 로드 완료: {len(dataset):,}개")
@@ -902,24 +961,49 @@ def train_hybrid_model(model_builder, X_train, X_test, y_train, y_test, feature_
 
 
 def train_mlp_model(model_builder, X_train, X_test, y_train, y_test):
-    """MLP 모델 훈련"""
+    """MLP 모델 훈련 (Progress Bar 추가)"""
     st.write("**2️⃣ MLP 분류 모델 구축**")
     
     # 모델 구축
     model = model_builder.build_mlp_model(X_train.shape[1])
     
     if st.button("🚀 MLP 모델 훈련 시작"):
-        with st.spinner("MLP 모델 훈련 중..."):
-            history = model_builder.train_model(X_train, y_train, X_test, y_test, epochs=100, verbose=0)
+        # 실시간 진행상황 표시
+        st.subheader("📊 실시간 훈련 진행상황")
         
-        st.success("✅ MLP 모델 훈련 완료!")
+        # Progress Bar 콜백 생성
+        progress_callback = create_streamlit_progress_callback(total_epochs=100)
+        
+        if TF_AVAILABLE and progress_callback:
+            # 콜백 설정
+            callbacks = [
+                progress_callback,
+                tf.keras.callbacks.EarlyStopping(
+                    monitor='val_loss', patience=10, restore_best_weights=True
+                )
+            ]
+            
+            # 모델 훈련
+            history = model_builder.train_model(
+                X_train, y_train, X_test, y_test, 
+                epochs=100, verbose=1, 
+                custom_callbacks=callbacks
+            )
+            
+            st.success("✅ MLP 모델 훈련 완료!")
+            
+        else:
+            # TensorFlow가 없는 경우 기본 방식으로 훈련
+            with st.spinner("MLP 모델 훈련 중..."):
+                history = model_builder.train_model(X_train, y_train, X_test, y_test, epochs=100, verbose=0)
+            st.success("✅ MLP 모델 훈련 완료!")
         
         # 성능 평가
         show_model_performance(model_builder, X_test, y_test)
 
 
 def train_cnn_model(model_builder, X_train, X_test, y_train, y_test):
-    """CNN 모델 훈련"""
+    """CNN 모델 훈련 (Progress Bar 추가)"""
     st.write("**2️⃣ CNN 시계열 모델 구축**")
     
     st.info("CNN 모델은 연속된 네트워크 패킷의 시간적 패턴을 학습합니다.")
@@ -928,17 +1012,42 @@ def train_cnn_model(model_builder, X_train, X_test, y_train, y_test):
     model = model_builder.build_cnn_model(X_train.shape[1])
     
     if st.button("🚀 CNN 모델 훈련 시작"):
-        with st.spinner("CNN 모델 훈련 중..."):
-            history = model_builder.train_model(X_train, y_train, X_test, y_test, epochs=50, verbose=0)
+        # 실시간 진행상황 표시
+        st.subheader("📊 실시간 훈련 진행상황")
         
-        st.success("✅ CNN 모델 훈련 완료!")
+        # Progress Bar 콜백 생성
+        progress_callback = create_streamlit_progress_callback(total_epochs=50)
+        
+        if TF_AVAILABLE and progress_callback:
+            # 콜백 설정
+            callbacks = [
+                progress_callback,
+                tf.keras.callbacks.EarlyStopping(
+                    monitor='val_loss', patience=10, restore_best_weights=True
+                )
+            ]
+            
+            # 모델 훈련
+            history = model_builder.train_model(
+                X_train, y_train, X_test, y_test, 
+                epochs=50, verbose=1, 
+                custom_callbacks=callbacks
+            )
+            
+            st.success("✅ CNN 모델 훈련 완료!")
+            
+        else:
+            # TensorFlow가 없는 경우 기본 방식으로 훈련
+            with st.spinner("CNN 모델 훈련 중..."):
+                history = model_builder.train_model(X_train, y_train, X_test, y_test, epochs=50, verbose=0)
+            st.success("✅ CNN 모델 훈련 완료!")
         
         # 성능 평가 (시퀀스 조정 필요)
         show_model_performance(model_builder, X_test, y_test)
 
 
 def train_autoencoder_model(model_builder, X_train, X_test, y_train, y_test):
-    """오토인코더 모델 훈련"""
+    """오토인코더 모델 훈련 (Progress Bar 추가)"""
     st.write("**2️⃣ 오토인코더 이상 탐지 모델 구축**")
     
     with st.expander("오토인코더 이상 탐지 원리"):
@@ -954,10 +1063,34 @@ def train_autoencoder_model(model_builder, X_train, X_test, y_train, y_test):
     model = model_builder.build_autoencoder_model(X_train.shape[1], encoding_dim)
     
     if st.button("🚀 오토인코더 훈련 시작"):
-        with st.spinner("오토인코더 훈련 중..."):
-            history = model_builder.train_model(X_train, y_train, epochs=100, verbose=0)
+        # 실시간 진행상황 표시
+        st.subheader("📊 실시간 훈련 진행상황")
         
-        st.success("✅ 오토인코더 훈련 완료!")
+        # Progress Bar 콜백 생성
+        progress_callback = create_streamlit_progress_callback(total_epochs=100)
+        
+        if TF_AVAILABLE and progress_callback:
+            # 콜백 설정
+            callbacks = [
+                progress_callback,
+                tf.keras.callbacks.EarlyStopping(
+                    monitor='val_loss', patience=10, restore_best_weights=True
+                )
+            ]
+            
+            # 모델 훈련
+            history = model_builder.train_model(
+                X_train, y_train, epochs=100, verbose=1, 
+                custom_callbacks=callbacks
+            )
+            
+            st.success("✅ 오토인코더 훈련 완료!")
+            
+        else:
+            # TensorFlow가 없는 경우 기본 방식으로 훈련
+            with st.spinner("오토인코더 훈련 중..."):
+                history = model_builder.train_model(X_train, y_train, epochs=100, verbose=0)
+            st.success("✅ 오토인코더 훈련 완료!")
         
         # 성능 평가
         show_model_performance(model_builder, X_test, y_test)

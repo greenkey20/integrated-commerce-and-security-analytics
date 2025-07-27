@@ -14,14 +14,36 @@ class WorkingCICIDSLoader:
 
         # 파일별 공격 데이터 위치 정보 (진단 결과 기반)
         self.file_info = {
+            # 기존 (유지)
             'Friday-WorkingHours-Afternoon-PortScan.pcap_ISCX.csv': {
-                'attack_start': 100000,  # 대략적인 공격 시작 위치
+                'attack_start': 100000,
                 'expected_labels': ['PortScan', 'BENIGN']
             },
-            # 추가 검증 후 확장 예정
+            
+            # 신규 추가 - TODO에서 확인된 파일들
+            'Tuesday-WorkingHours.pcap_ISCX.csv': {
+                'attack_start': 50000,
+                'expected_labels': ['FTP-Patator', 'BENIGN']
+            },
+            'Wednesday-workingHours.pcap_ISCX.csv': {
+                'attack_start': 50000,
+                'expected_labels': ['DoS slowloris', 'BENIGN']
+            },
+            'Thursday-WorkingHours-Morning-WebAttacks.pcap_ISCX.csv': {
+                'attack_start': 50000,
+                'expected_labels': ['Web Attack – Brute Force', 'BENIGN']  # 실제 라벨명 사용
+            },
+            'Friday-WorkingHours-Afternoon-DDos.pcap_ISCX.csv': {
+                'attack_start': 50000,
+                'expected_labels': ['DDoS', 'BENIGN']
+            },
+            'Thursday-WorkingHours-Afternoon-Infilteration.pcap_ISCX.csv': {
+                'attack_start': 100000,  # Infiltration은 더 뒤에 위치할 수 있음
+                'expected_labels': ['Infiltration', 'BENIGN']
+            }
         }
 
-    def load_working_files(self, target_samples: int = 100000) -> pd.DataFrame:
+    def load_working_files(self, target_samples: int = 300000) -> pd.DataFrame:
         """작동하는 파일들만 로드"""
 
         all_data = []
@@ -73,7 +95,7 @@ class WorkingCICIDSLoader:
 def quick_validate_more_files():
     """다른 파일들도 빠르게 검증"""
 
-    data_dir = "C:/keydev/customer-segmentation-analysis/data/cicids2017"
+    data_dir = "C:/keydev/integrated-commerce-and-security-analytics/data/cicids2017"
 
     candidates = [
         'Monday-WorkingHours.pcap_ISCX.csv',
@@ -146,21 +168,15 @@ if __name__ == "__main__":
     print(f"\n📋 사용 가능한 파일들: {working_files}")
 
     # 2. 작동하는 파일로 데이터 로드 테스트
-    if working_files:
-        try:
-            loader = WorkingCICIDSLoader("C:/keydev/customer-segmentation-analysis/data/cicids2017")
-
-            # 알려진 작동 파일 추가
-            for filename in working_files:
-                loader.file_info[filename] = {
-                    'attack_start': 50000,  # 공격 데이터 시작 추정 위치
-                    'expected_labels': ['Attack', 'BENIGN']
-                }
-
-            # 데이터 로드
-            dataset = loader.load_working_files(target_samples=50000)
-            print("\n🎉 CICIDS2017 부분 활용 성공!")
-
-        except Exception as e:
-            print(f"\n❌ 로드 실패: {e}")
-            print("💡 RealisticSecurityDataGenerator 확장을 권장합니다")
+    try:
+        loader = WorkingCICIDSLoader("C:/keydev/integrated-commerce-and-security-analytics/data/cicids2017")
+        
+        # 이미 file_info에 모든 파일이 설정되어 있으므로 추가 설정 불필요
+        
+        # 데이터 로드 (더 많은 샘플)
+        dataset = loader.load_working_files(target_samples=300000)
+        print("\n🎉 CICIDS2017 부분 활용 성공!")
+        
+    except Exception as e:
+        print(f"\n❌ 로드 실패: {e}")
+        print("💡 RealisticSecurityDataGenerator 확장을 권장합니다")
