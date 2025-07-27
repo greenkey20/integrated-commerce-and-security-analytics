@@ -1,0 +1,22 @@
+# Python 3.13 호환 패키지들 (더 유연한 버전)
+
+# 핵심 프레임워크
+streamlit>=1.28.0
+pandas>=2.0.0  # 버전 제약 완화
+numpy>=1.24.0  # 안정적 버전
+
+# 머신러닝
+scikit-learn>=1.3.0
+tensorflow>=2.13.0
+scipy>=1.11.0
+
+# 시각화
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0
+
+# 유틸리티
+typing-extensions>=4.5.0
+
+# 개발용 (선택사항)
+# ucimlrepo>=0.0.3  # 필요시 나중에 설치

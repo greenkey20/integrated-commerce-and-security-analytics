@@ -1,0 +1,23 @@
+# Python 3.13 호환 패키지들 (TensorFlow 제외)
+
+# 핵심 프레임워크
+streamlit>=1.28.0
+pandas>=2.0.0
+numpy>=1.24.0
+
+# 머신러닝 (TensorFlow 대신)
+scikit-learn>=1.3.0
+scipy>=1.11.0
+# torch>=2.0.0  # PyTorch는 TensorFlow 대안
+
+# 시각화
+matplotlib>=3.7.0
+seaborn>=0.12.0
+plotly>=5.15.0
+
+# 유틸리티
+typing-extensions>=4.5.0
+
+# 나중에 추가할 것들 (Python 3.13 지원 시)
+# tensorflow>=2.13.0  # 아직 미지원
+# ucimlrepo>=0.0.3
