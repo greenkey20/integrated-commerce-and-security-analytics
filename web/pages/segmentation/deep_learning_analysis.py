@@ -425,16 +425,181 @@ def _display_classification_results(n_clusters):
     with col3:
         st.metric("훈련 에포크 수", len(history.history["loss"]))
     
-    # 혼동 행렬 시각화
+    # 혼동 행렬 및 상세 설명
+    st.subheader("🎯 혼동 행렬 (Confusion Matrix) 분석")
+    
+    with st.expander("🤔 혼동 행렬이란? (상세 설명)", expanded=False):
+        st.markdown("""
+        ### 📊 혼동 행렬의 정의
+        
+        **혼동 행렬**은 분류 모델의 성능을 시각적으로 평가하는 핵심 도구야. 
+        마치 **시험 채점표**처럼 "실제 정답"과 "모델이 예측한 답"을 비교해서 
+        어디서 맞추고 틀렸는지를 한눈에 보여줘.
+        
+        ### 🔍 행렬 구조 이해하기
+        
+        ```
+        실제\예측    클러스터0   클러스터1   클러스터2
+        클러스터0      [85]       [3]        [2]    ← 실제 클러스터0 고객들
+        클러스터1      [4]        [78]       [1]    ← 실제 클러스터1 고객들  
+        클러스터2      [1]        [2]        [89]   ← 실제 클러스터2 고객들
+        ```
+        
+        **각 셀의 의미:**
+        - **대각선 (85, 78, 89)**: 정확히 예측한 고객 수 ✅
+        - **비대각선 (3, 2, 4, 1, 1, 2)**: 잘못 예측한 고객 수 ❌
+        
+        ### 💡 실생활 비유로 이해하기
+        
+        **카페 고객 분류 시스템**을 예로 들어보자:
+        - 실제로는 "단골고객"인데 "신규고객"으로 분류 → 할인 혜택 못받음 😞
+        - 실제로는 "신규고객"인데 "단골고객"으로 분류 → 과도한 할인 제공 💸
+        
+        **은행 신용평가 시스템**:
+        - 실제 우량고객을 불량고객으로 분류 → 대출 거절 (기회 손실)
+        - 실제 불량고객을 우량고객으로 분류 → 부실채권 발생 (금전 손실)
+        
+        ### 📈 핵심 성능 지표 계산법
+        
+        **1. 정확도 (Accuracy)**
+        ```
+        정확도 = (올바른 예측 수) / (전체 예측 수)
+               = (85 + 78 + 89) / (85+3+2+4+78+1+1+2+89)
+               = 252 / 265 = 95.1%
+        ```
+        
+        **2. 클러스터별 정밀도 (Precision)**
+        - 클러스터0 정밀도 = 85 / (85+4+1) = 94.4%
+        - "이 클러스터로 예측한 것 중 실제로 맞는 비율"
+        - **비즈니스 의미**: 타겟 마케팅 정확성
+        
+        **3. 클러스터별 재현율 (Recall)**
+        - 클러스터0 재현율 = 85 / (85+3+2) = 94.4%
+        - "실제 이 클러스터 고객을 얼마나 잘 찾아내는가"
+        - **비즈니스 의미**: 놓치는 고객 수
+        
+        **4. F1-Score**
+        ```
+        F1 = 2 × (정밀도 × 재현율) / (정밀도 + 재현율)
+        ```
+        - 정밀도와 재현율의 **조화평균**
+        - 두 지표의 균형을 나타내는 종합 점수
+        
+        ### 🎯 비즈니스 관점에서의 해석
+        
+        **좋은 혼동 행렬의 특징:**
+        - 대각선 값이 클수록 좋음 (정확한 분류)
+        - 비대각선 값이 작을수록 좋음 (오분류 적음)
+        - 각 행/열의 합이 비슷할수록 좋음 (균형잡힌 데이터)
+        
+        **실무 활용 시나리오:**
+        
+        **마케팅 캠페인 설계:**
+        - 정밀도가 높은 클러스터 → 확실한 타겟, 집중 투자
+        - 재현율이 낮은 클러스터 → 놓치는 고객 多, 접근법 개선 필요
+        
+        **고객 서비스 전략:**
+        - 오분류가 많은 구간 파악 → 추가 데이터 수집 필요
+        - 비용이 큰 오분류(예: VIP를 일반고객으로) 우선 개선
+        
+        **모델 개선 방향:**
+        - 특정 클러스터 간 오분류가 많다면 → 특성 추가 고려
+        - 전체적으로 성능이 낮다면 → 하이퍼파라미터 튜닝
+        """)
+    
+    # 혼동 행렬 계산 및 시각화
     cm = confusion_matrix(y_test, y_pred_classes)
+    
+    # 혼동 행렬 해석 도움말
+    st.info("""
+    💡 **혼동 행렬 읽는 법**: 
+    - **행(세로)**: 실제 클러스터 
+    - **열(가로)**: 예측한 클러스터
+    - **대각선**: 정확히 맞춘 고객 수 (진한 색일수록 좋음)
+    - **비대각선**: 잘못 분류된 고객 수 (연한 색일수록 좋음)
+    """)
+    
     fig = px.imshow(
         cm,
         labels=dict(x="예측 클러스터", y="실제 클러스터", color="고객 수"),
         x=[f"클러스터 {i}" for i in range(n_clusters)],
         y=[f"클러스터 {i}" for i in range(n_clusters)],
-        title="혼동 행렬 (Confusion Matrix)",
+        title="혼동 행렬 (Confusion Matrix) - 모델 예측 정확성 분석",
+        color_continuous_scale="Greens"
     )
+    
+    # 혼동 행렬 셀에 숫자 표시
+    fig.update_traces(
+        text=cm,
+        texttemplate="%{text}",
+        textfont={"size": 16, "color": "white"},
+        hovertemplate="실제: %{y}<br>예측: %{x}<br>고객수: %{z}<extra></extra>"
+    )
+    
     st.plotly_chart(fig, use_container_width=True)
+    
+    # 혼동 행렬 수치 분석
+    st.write("**🔍 혼동 행렬 상세 분석:**")
+    
+    # 대각선 합계 (정확한 예측)
+    diagonal_sum = np.trace(cm)
+    total_sum = np.sum(cm)
+    overall_accuracy = diagonal_sum / total_sum
+    
+    col1, col2, col3 = st.columns(3)
+    
+    with col1:
+        st.metric(
+            "정확한 예측 수", 
+            f"{diagonal_sum}명",
+            help="대각선 요소들의 합계 (올바르게 분류된 고객 수)"
+        )
+    
+    with col2:
+        st.metric(
+            "잘못된 예측 수", 
+            f"{total_sum - diagonal_sum}명",
+            help="비대각선 요소들의 합계 (잘못 분류된 고객 수)"
+        )
+    
+    with col3:
+        st.metric(
+            "혼동 행렬 정확도", 
+            f"{overall_accuracy:.1%}",
+            help="전체 테스트 데이터에 대한 정확도"
+        )
+    
+    # 클러스터별 오분류 패턴 분석
+    st.write("**⚠️ 주요 오분류 패턴:**")
+    
+    misclassification_data = []
+    for actual in range(n_clusters):
+        for predicted in range(n_clusters):
+            if actual != predicted and cm[actual, predicted] > 0:
+                misclassification_data.append({
+                    "실제 클러스터": f"클러스터 {actual}",
+                    "예측 클러스터": f"클러스터 {predicted}",
+                    "오분류 고객 수": cm[actual, predicted],
+                    "실제 클러스터 내 비율": f"{cm[actual, predicted] / np.sum(cm[actual, :]) * 100:.1f}%"
+                })
+    
+    if misclassification_data:
+        misclass_df = pd.DataFrame(misclassification_data)
+        misclass_df = misclass_df.sort_values("오분류 고객 수", ascending=False)
+        st.dataframe(misclass_df, use_container_width=True)
+        
+        # 가장 큰 오분류 패턴에 대한 개선 제안
+        if len(misclass_df) > 0:
+            top_misclass = misclass_df.iloc[0]
+            st.warning(f"""
+            🔍 **주의깊게 살펴볼 오분류**: 
+            {top_misclass['실제 클러스터']} → {top_misclass['예측 클러스터']} 
+            ({top_misclass['오분류 고객 수']}명, {top_misclass['실제 클러스터 내 비율']})
+            
+            **개선 방안**: 이 두 클러스터를 구별하는 추가 특성 데이터 수집 고려
+            """)
+    else:
+        st.success("🎉 완벽한 분류! 모든 고객이 정확하게 분류되었습니다.")
     
     # 클러스터별 성능 분석
     st.write("**🎯 클러스터별 예측 성능:**")
