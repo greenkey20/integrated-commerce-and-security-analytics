@@ -123,7 +123,14 @@ def show_evaluation_page():
         st.subheader("📈 종합 모델 성능 시각화")
         
         try:
-            performance_fig = RetailVisualizer.create_model_performance_plots(evaluation_results)
+            # training_results와 evaluation_results를 합쳐서 전달
+            combined_results = {**evaluation_results}
+            combined_results.update({
+                'y_test': training_results['y_test'],
+                'y_test_pred': training_results['y_test_pred']
+            })
+            
+            performance_fig = RetailVisualizer.create_model_performance_plots(combined_results)
             st.plotly_chart(performance_fig, use_container_width=True)
         except Exception as e:
             st.warning(f"성능 시각화 생성 중 오류: {str(e)}")

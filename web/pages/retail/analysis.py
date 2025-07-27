@@ -39,34 +39,12 @@ warnings.filterwarnings("ignore")
 
 
 def show_retail_analysis_page():
-    """Online Retail 분석 메인 페이지"""
-    
-    st.title("🛒 Online Retail 고객 분석")
-    st.markdown("""
-    실제 영국 온라인 소매업체의 거래 데이터를 활용하여 고객별 구매 예측 모델을 구축합니다.
-    
-    **📚 "혼공머신" 연계 학습 포인트:**
-    - 3장: 회귀 알고리즘과 모델 규제 (선형회귀 적용)
-    - 실무급 데이터 전처리와 특성 공학 경험
-    
-    **🎯 ADP 실기 연계 학습 요소:**
-    - 대용량 데이터 품질 분석
-    - groupby, agg 함수 활용한 집계 분석  
-    - 파생 변수 생성 및 특성 공학
-    
-    **🔧 리팩토링 개선사항:**
-    - 모듈화된 코드 구조로 유지보수성 향상
-    - 각 단계별 독립적인 페이지로 분리
-    - 재사용 가능한 컴포넌트 설계
-    """)
+    """Online Retail 분석 메인 페이지 - 요약만 표시"""
     
     # 세션 상태 초기화
     initialize_session_state()
     
-    # 메인 앱에서 추가 단계 선택 버튼 제공 (선택적)
-    show_step_navigation()
-    
-    # 기본적으로 전체 분석 요약 페이지 표시
+    # 전체 분석 요약 페이지만 표시 (중복 방지)
     show_analysis_summary_page()
 
 
@@ -81,7 +59,14 @@ def initialize_session_state():
         'retail_target_created': False,
         'retail_model_trained': False,
         'retail_model_evaluated': False,
-        'analysis_step': "1️⃣ 데이터 로딩 & 품질 분석"
+        'analysis_step': "1️⃣ 데이터 로딩 & 품질 분석",
+        'retail_validation_report': {'data_quality_score': 0},  # AttributeError 방지
+        'retail_raw_data': pd.DataFrame(),
+        'retail_cleaned_data': pd.DataFrame(),
+        'retail_customer_features': pd.DataFrame(),
+        'retail_target_data': pd.DataFrame({'predicted_next_amount': [0]}),
+        'retail_target_months': 6,
+        'retail_evaluation_results': {'r2_test': 0, 'mae_test': 0, 'rmse_test': 0, 'relative_error': 0}
     }
     
     for key, value in default_states.items():
@@ -90,8 +75,8 @@ def initialize_session_state():
 
 
 def show_step_navigation():
-    """메인 콘텐츠 영역에서 추가 단계 선택 버튼 제공 (선택적)"""
-    st.info("📍 이 페이지는 main_app.py의 새로운 계층형 네비게이션으로 관리됩니다.")
+    """비활성화된 함수 - 중복 방지"""
+    pass  # 사용 안함
 
 
 def show_analysis_summary_page():
