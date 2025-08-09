@@ -1,0 +1,16 @@
+{
+  "permissions": {
+    "allow": [
+      "Bash(sed:*)",
+      "Bash(grep:*)",
+      "Bash(rm:*)",
+      "Bash(cp:*)",
+      "Bash(streamlit run:*)",
+      "Bash(claude status)",
+      "Bash(pip3 list:*)",
+      "Bash(python3:*)",
+      "Bash(mv:*)"
+    ],
+    "deny": []
+  }
+}

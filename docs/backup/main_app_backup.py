@@ -12,33 +12,12 @@ import os
 import sys
 import warnings
 
-# numpy 호환성 문제 해결 (numpy 1.24+ 대응) - 모든 import보다 먼저 실행
-try:
-    import numpy as np
-    if not hasattr(np, 'bool'):
-        np.bool = bool
-    if not hasattr(np, 'int'):
-        np.int = int
-    if not hasattr(np, 'float'):
-        np.float = float
-    if not hasattr(np, 'complex'):
-        np.complex = complex
-    if not hasattr(np, 'object'):
-        np.object = object
-    if not hasattr(np, 'str'):
-        np.str = str
-except ImportError:
-    pass  # numpy가 없는 경우 무시
-
 # Tensorflow 경고 완전 억제
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
 # Python warnings 억제
 warnings.filterwarnings("ignore")
-warnings.filterwarnings("ignore", category=FutureWarning)
-warnings.filterwarnings("ignore", category=DeprecationWarning)
-warnings.filterwarnings("ignore", message=".*numpy.*")
 
 # 잠시 stderr 차단 (Tensorflow import 시)
 import io
@@ -57,14 +36,11 @@ def suppress_output():
             sys.stdout = old_stdout
             sys.stderr = old_stderr
 
-# Tensorflow import 시 output 억제 (호환성 문제 시 무시)
-try:
-    with suppress_output():
-        import tensorflow as tf
-        tf.get_logger().setLevel("ERROR")
-except Exception as e:
-    print(f"TensorFlow import 실패 (애플리케이션은 계속 실행됩니다): {e}")
-    tf = None
+# Tensorflow import 시 output 억제
+with suppress_output():
+    import tensorflow as tf
+    tf.get_logger().setLevel('ERROR')
+
 import streamlit as st
 
 # Python 경로 설정
@@ -500,8 +476,7 @@ def setup_simple_sidebar():
                 "4️⃣ 주성분 분석",
                 "5️⃣ 딥러닝 분석",
                 "6️⃣ customer segmentation 예측",
-                "7️⃣ 마케팅 전략",
-                "8️⃣ 🧠 LangChain 고객 분석"
+                "7️⃣ 마케팅 전략"
             ],
             key="customer_step_select"
         )
@@ -625,13 +600,7 @@ def route_to_hierarchical_page(retail_step, customer_step, security_step, curren
                     pages['marketing_strategy']()
                 else:
                     show_fallback_page("📈 마케팅 전략", "web/pages/segmentation/marketing_strategy.py")
-            elif "8️⃣ 🧠 LangChain" in customer_step:
-                try:
-                    from web.pages.langchain.customer_analysis_page import show_customer_analysis_page
-                    show_customer_analysis_page()
-                except Exception as e:
-                    st.error(f"LangChain 고객 분석 페이지 로드 실패: {str(e)}")
-                    show_fallback_page("🧠 LangChain 고객 분석", "LangChain 기반 고객 분석 기능")
+
         elif current_focus == 'security':
             # 3. Security Analytics 라우팅
             if "1️⃣ 데이터 로딩" in security_step:
