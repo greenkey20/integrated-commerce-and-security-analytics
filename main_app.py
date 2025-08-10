@@ -12,33 +12,68 @@ import os
 import sys
 import warnings
 
-# numpy 호환성 문제 해결 (numpy 1.24+ 대응) - 모든 import보다 먼저 실행
+# 강화된 numpy 호환성 문제 해결 (numpy 1.24.4 최적화)
 try:
     import numpy as np
-    if not hasattr(np, 'bool'):
-        np.bool = bool
-    if not hasattr(np, 'int'):
-        np.int = int
-    if not hasattr(np, 'float'):
-        np.float = float
-    if not hasattr(np, 'complex'):
-        np.complex = complex
-    if not hasattr(np, 'object'):
-        np.object = object
-    if not hasattr(np, 'str'):
-        np.str = str
+    
+    # numpy 1.24+ deprecated 속성들 완전 복원
+    deprecated_attrs = {
+        'bool': bool,
+        'int': int,
+        'float': float, 
+        'complex': complex,
+        'object': object,
+        'str': str,
+        'unicode': str,
+        'bytes': bytes
+    }
+    
+    for attr, value in deprecated_attrs.items():
+        if not hasattr(np, attr):
+            setattr(np, attr, value)
+    
+    # typeDict 특별 처리 (TensorFlow 호환성)
+    if not hasattr(np, 'typeDict'):
+        np.typeDict = {
+            'bool': np.bool_,
+            'int': np.int64,
+            'float': np.float64, 
+            'complex': np.complex128,
+            'object': np.object_,
+            'str': np.str_,
+            'unicode': np.str_,
+            'bytes': np.bytes_
+        }
+    
+    print("✅ numpy 호환성 패치 완료 (v1.24.4)")
+    
 except ImportError:
-    pass  # numpy가 없는 경우 무시
+    print("⚠️ numpy 설치 필요")
+    pass
 
 # Tensorflow 경고 완전 억제
 os.environ['TF_CPP_MIN_LOG_LEVEL'] = '3'
 os.environ['TF_ENABLE_ONEDNN_OPTS'] = '0'
 
-# Python warnings 억제
+# 모든 경고 완전 억제 (FutureWarning 포함)
 warnings.filterwarnings("ignore")
-warnings.filterwarnings("ignore", category=FutureWarning)
+warnings.filterwarnings("ignore", category=FutureWarning) 
 warnings.filterwarnings("ignore", category=DeprecationWarning)
+warnings.filterwarnings("ignore", category=UserWarning)
 warnings.filterwarnings("ignore", message=".*numpy.*")
+warnings.filterwarnings("ignore", message=".*typeDict.*")
+warnings.filterwarnings("ignore", message=".*str.*")
+
+# numpy 추가 호환성 설정 (FutureWarning 방지)
+if 'np' in globals() and hasattr(np, '__version__'):
+    try:
+        # numpy 1.24+ 버전에서 추가 호환성 설정
+        np_version = tuple(map(int, np.__version__.split('.')[:2]))
+        if np_version >= (1, 24):
+            np.set_printoptions(legacy='1.21')
+            print(f"✅ numpy {np.__version__} 추가 설정 완료")
+    except Exception:
+        pass
 
 # 잠시 stderr 차단 (Tensorflow import 시)
 import io
@@ -57,13 +92,18 @@ def suppress_output():
             sys.stdout = old_stdout
             sys.stderr = old_stderr
 
-# Tensorflow import 시 output 억제 (호환성 문제 시 무시)
+# TensorFlow import 시 warning 억제 (numpy 호환성 문제 방지)
 try:
     with suppress_output():
         import tensorflow as tf
         tf.get_logger().setLevel("ERROR")
+        
+        # TensorFlow 내부 numpy 호환성 설정
+        tf.compat.v1.logging.set_verbosity(tf.compat.v1.logging.ERROR)
+        
+        print("✅ TensorFlow 로드 완료 (warning 억제)")
 except Exception as e:
-    print(f"TensorFlow import 실패 (애플리케이션은 계속 실행됩니다): {e}")
+    print(f"⚠️ TensorFlow 설치 필요 (딥러닝 기능 비활성화): {e}")
     tf = None
 import streamlit as st
 
@@ -626,12 +666,94 @@ def route_to_hierarchical_page(retail_step, customer_step, security_step, curren
                 else:
                     show_fallback_page("📈 마케팅 전략", "web/pages/segmentation/marketing_strategy.py")
             elif "8️⃣ 🧠 LangChain" in customer_step:
+                st.header("🧠 LangChain 고객 분석")
+
+                # 깔끔한 준비 중 페이지
+                st.info("🚧 **LangChain 기능 준비 중**")
+
+                col1, col2 = st.columns([2, 1])
+
+                with col1:
+                    st.markdown("""
+                        **📋 준비 중인 LangChain 기능:**
+                        - 🤖 OpenAI GPT 기반 고객 세그먼트 해석
+                        - 💡 AI 생성 비즈니스 인사이트
+                        - 📈 자동화된 마케팅 전략 제안
+                        - 🔮 개별 고객 행동 예측 분석
+    
+                        **🔧 현재 진행 상황:**
+                        - ✅ 환경 설정 준비 완료
+                        - 🔄 의존성 패키지 설치 진행 중
+                        - ⏳ OpenAI API 연결 테스트 예정
+                        - 📝 실제 AI 체인 구현 예정
+                        """)
+
+                with col2:
+                    st.image("https://via.placeholder.com/200x150/22C55E/FFFFFF?text=LangChain",
+                             caption="LangChain 로고")
+
+                    st.markdown("**📚 학습 계획:**")
+                    st.markdown("- Week 1: 기본 체인")
+                    st.markdown("- Week 2: Advanced RAG")
+                    st.markdown("- Week 3: 모니터링")
+                    st.markdown("- Week 4: 멀티에이전트")
+
+                # 현재 고객 데이터 미리보기 (LangChain 없이)
+                st.markdown("### 📊 현재 분석 가능한 데이터")
+
                 try:
-                    from web.pages.langchain.customer_analysis_page import show_customer_analysis_page
-                    show_customer_analysis_page()
+                    from data.processors.segmentation_data_processor import DataProcessor
+
+                    data_processor = DataProcessor()
+                    customer_data = data_processor.load_data()
+
+                    if customer_data is not None:
+                        col1, col2, col3, col4 = st.columns(4)
+
+                        with col1:
+                            st.metric("총 고객 수", f"{len(customer_data):,}명")
+                        with col2:
+                            st.metric("평균 연령", f"{customer_data['Age'].mean():.1f}세")
+                        with col3:
+                            st.metric("평균 소득", f"${customer_data['Annual Income (k$)'].mean():.1f}k")
+                        with col4:
+                            st.metric("평균 지출점수", f"{customer_data['Spending Score (1-100)'].mean():.1f}")
+
+                        st.success("✅ 고객 데이터 준비 완료 - LangChain 연결 시 즉시 AI 분석 가능")
+
+                        # 간단한 데이터 미리보기
+                        with st.expander("📋 데이터 샘플 미리보기"):
+                            st.dataframe(customer_data.head(), use_container_width=True)
+                    else:
+                        st.warning("⚠️ 고객 데이터 로딩 필요")
+
                 except Exception as e:
-                    st.error(f"LangChain 고객 분석 페이지 로드 실패: {str(e)}")
-                    show_fallback_page("🧠 LangChain 고객 분석", "LangChain 기반 고객 분석 기능")
+                    st.warning(f"데이터 미리보기 오류: {str(e)}")
+
+                # 향후 기능 데모
+                st.markdown("### 🎯 LangChain 구현 후 예상 결과")
+
+                # 샘플 AI 분석 결과 (정적)
+                sample_analysis = {
+                    "고소득 고지출 그룹": {
+                        "특징": "프리미엄 제품 선호, 브랜드 충성도 높음",
+                        "전략": "VIP 프로그램 강화, 개인화 서비스 제공",
+                        "예상 ROI": "+25%"
+                    },
+                    "저소득 고지출 그룹": {
+                        "특징": "유행에 민감, 충동구매 성향",
+                        "전략": "한정판 상품, SNS 마케팅 집중",
+                        "예상 ROI": "+15%"
+                    }
+                }
+
+                for group, info in sample_analysis.items():
+                    with st.expander(f"🎯 {group} 예상 분석 결과"):
+                        st.write(f"**특징**: {info['특징']}")
+                        st.write(f"**추천 전략**: {info['전략']}")
+                        st.write(f"**예상 ROI**: {info['예상 ROI']}")
+
+                st.info("💡 **실제 LangChain 구현 시**: 위 분석이 AI에 의해 자동 생성되며, 실시간 데이터 업데이트에 따라 동적으로 변경됩니다.")
         elif current_focus == 'security':
             # 3. Security Analytics 라우팅
             if "1️⃣ 데이터 로딩" in security_step:
