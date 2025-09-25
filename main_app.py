@@ -507,6 +507,14 @@ def setup_simple_sidebar():
                         type="primary" if st.session_state.current_focus == 'security' else "secondary",
                         use_container_width=True):
         st.session_state.current_focus = 'security'
+
+    # C. Text Analytics 섹션 추가
+    st.sidebar.markdown("### 📝 **C. Text Analytics**")
+
+    if st.sidebar.button("💬 1. 텍스트 감정 분석", key="tab_text",
+                         type="primary" if st.session_state.current_focus == 'text' else "secondary",
+                         use_container_width=True):
+        st.session_state.current_focus = 'text'
     
     st.sidebar.markdown("---")
     
@@ -560,6 +568,21 @@ def setup_simple_sidebar():
                 "7️⃣ 종합 성능 평가"
             ],
             key="security_step_select"
+        )
+
+    # 포커스된 섹션 처리 추가
+    elif st.session_state.current_focus == 'text':
+        st.sidebar.markdown("**💬 Text Analytics**")
+        text_step = st.sidebar.selectbox(
+            "단계 선택:",
+            [
+                "1️⃣ IMDB 영화 리뷰 감정 분석",
+                "2️⃣ 뉴스 기사 카테고리 분류",
+                "3️⃣ 커스텀 텍스트 분류기",
+                "4️⃣ 텍스트 요약 (고급)",
+                "5️⃣ 실시간 감정 분석 API"
+            ],
+            key="text_step_select"
         )
     
     # 빠른 액션

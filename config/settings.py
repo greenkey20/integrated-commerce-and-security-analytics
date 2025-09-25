@@ -175,3 +175,22 @@ class UIConfig:
     DEFAULT_SECTION = "📊 Business Intelligence"
     DEFAULT_MODULE = "💰 Retail Prediction"
     DEFAULT_PAGE = "📊 전체 분석 요약"
+
+# config/settings.py에 추가
+class TextAnalyticsConfig:
+    """텍스트 분석 도메인 설정"""
+
+    # IMDB 감정 분석
+    IMDB_VOCAB_SIZE = 10000
+    IMDB_MAX_LENGTH = 500
+    IMDB_EMBEDDING_DIM = 100
+    IMDB_LSTM_UNITS = 64
+
+    # 뉴스 분류 (확장용)
+    NEWS_CATEGORIES = ['business', 'entertainment', 'politics', 'sport', 'tech']
+
+    # 공통 설정
+    BATCH_SIZE = 32
+    EPOCHS = 50
+    VALIDATION_SPLIT = 0.2
+    EARLY_STOPPING_PATIENCE = 5
