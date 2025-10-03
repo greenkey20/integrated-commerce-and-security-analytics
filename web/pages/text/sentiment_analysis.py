@@ -9,7 +9,7 @@ import pandas as pd
 import plotly.express as px
 from tensorflow.keras.datasets import imdb
 from tensorflow.keras.preprocessing.sequence import pad_sequences
-from core.text_analytics.sentiment_models import TextAnalyticsModels
+from core.text.sentiment_models import TextAnalyticsModels
 from config.settings import TextAnalyticsConfig
 
 
