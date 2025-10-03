@@ -12,16 +12,17 @@ def _must_reach(url: str):
         pytest.skip(f"Server not reachable at {BASE_URL}; start uvicorn and retry")
 
 
-def test_root():
+def test_root_integration():
     _must_reach(BASE_URL)
     resp = requests.get(f"{BASE_URL}/")
     assert resp.status_code == 200
     data = resp.json()
-    assert data.get("message") == "Text Analytics API v1.0"
-    assert data.get("status") == "running"
+    assert data.get("message") == "Integrated Analytics API"
+    assert "text" in data.get("domains", [])
+    assert "text" in data.get("active_domains", [])
 
 
-def test_health():
+def test_health_integration():
     _must_reach(BASE_URL)
     resp = requests.get(f"{BASE_URL}/health")
     assert resp.status_code == 200
@@ -30,7 +31,7 @@ def test_health():
     assert "timestamp" in data
 
 
-def test_analyze_positive():
+def test_analyze_positive_integration():
     _must_reach(BASE_URL)
     payload = {"text": "I loved this movie"}
     resp = requests.post(f"{BASE_URL}/text/analyze", json=payload)
@@ -42,8 +43,8 @@ def test_analyze_positive():
     assert isinstance(data.get("confidence"), float)
 
 
-def test_analyze_validation_error():
+def test_analyze_validation_error_integration():
     _must_reach(BASE_URL)
-    # missing required 'text' field should produce 422
     resp = requests.post(f"{BASE_URL}/text/analyze", json={})
     assert resp.status_code == 422
+
