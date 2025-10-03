@@ -1,159 +1,84 @@
 """
 보안 모듈 - CICIDS2017 네트워크 이상 탐지
 
-이 패키지는 네트워크 보안 이상 탐지를 위한 모듈들을 포함합니다:
-- data_loader: CICIDS2017 데이터 로딩 및 전처리 (백업에서 복원 완료)
-- model_builder: 딥러닝 모델 구축
-- attack_detector: 실시간 공격 탐지 (백업에서 복원 완료)
-
-참고: detection_engine은 복잡성으로 인해 임시로 비활성화됨
+이 패키지는 네트워크 보안 이상 탐지를 위한 모듈들을 포함합니다.
+상위 패키지 임포트 시 무거운 서브모듈(TensorFlow 등)이 자동으로 로드되지 않도록
+심볼 접근 시점에 지연 로딩(lazy import)을 사용합니다.
 """
 
-# ✅ 데이터 로더 - 백업에서 복원 완료 (Safe Import)
-try:
-    from data.loaders.unified_security_loader import (
-        CICIDSDataLoader,
-        check_cicids_data_availability,
-        generate_cicids_sample_data,
-        generate_enhanced_sample_data
-    )
-except ImportError as e:
-    print(f"Warning: Security data loader import failed: {e}")
-    # Fallback: 빈 클래스들로 대체
-    class CICIDSDataLoader:
-        def __init__(self, *args, **kwargs):
-            pass
-    def check_cicids_data_availability():
-        return {"available": False, "error": "Module not available"}
-    def generate_cicids_sample_data(*args, **kwargs):
-        return None
-    def generate_enhanced_sample_data(*args, **kwargs):
-        return None
+import importlib
+import warnings
 
-# ✅ 모델 빌더 - 기존 유지 (우수한 상태) (Safe Import)
-try:
-    from .model_builder import (
-        SecurityModelBuilder,
-        AttackPatternAnalyzer,
-        check_tensorflow_availability,
-        install_tensorflow
-    )
-except ImportError as e:
-    print(f"Warning: Model builder import failed: {e}")
-    class SecurityModelBuilder:
-        def __init__(self, *args, **kwargs):
-            pass
-    class AttackPatternAnalyzer:
-        def __init__(self, *args, **kwargs):
-            pass
-    def check_tensorflow_availability():
-        return False
-    def install_tensorflow():
-        return False
+# 심볼 -> 실제 모듈 경로 매핑
+_ATTR_MODULE_MAP = {
+    # data loader
+    'CICIDSDataLoader': 'data.loaders.unified_security_loader',
+    'check_cicids_data_availability': 'data.loaders.unified_security_loader',
+    'generate_cicids_sample_data': 'data.loaders.unified_security_loader',
+    'generate_enhanced_sample_data': 'data.loaders.unified_security_loader',
 
-# ✅ 공격 탐지기 - 백업에서 복원 완료 (Safe Import)
-try:
-    from .attack_detector import (
-        RealTimeAttackDetector,
-        TrafficSimulator,
-        PerformanceEvaluator,
-        AlertManager,
-        DetectionOrchestrator,
-        create_detection_system,
-        run_quick_simulation,
-        evaluate_attack_detection
-    )
-except ImportError as e:
-    print(f"Warning: Attack detector import failed: {e}")
-    class RealTimeAttackDetector:
-        def __init__(self, *args, **kwargs):
-            pass
-    class TrafficSimulator:
-        def __init__(self, *args, **kwargs):
-            pass
-    class PerformanceEvaluator:
-        def __init__(self, *args, **kwargs):
-            pass
-    class AlertManager:
-        def __init__(self, *args, **kwargs):
-            pass
-    class DetectionOrchestrator:
-        def __init__(self, *args, **kwargs):
-            pass
-    def create_detection_system(*args, **kwargs):
-        return None
-    def run_quick_simulation(*args, **kwargs):
-        return None
-    def evaluate_attack_detection(*args, **kwargs):
-        return None
+    # model builder (무거울 수 있음 - 지연 로딩)
+    'SecurityModelBuilder': 'core.security.model_builder',
+    'AttackPatternAnalyzer': 'core.security.model_builder',
+    'check_tensorflow_availability': 'core.security.model_builder',
+    'install_tensorflow': 'core.security.model_builder',
 
-# ✅ detection_engine - 고도화된 통합 탐지 엔진 복원 완료 (Safe Import)
-try:
-    from .detection_engine import (
-        UnifiedDetectionEngine,
-        RealTimeSecurityMonitor,
-        TrafficSimulator as EnhancedTrafficSimulator,
-        PerformanceEvaluator as EnhancedPerformanceEvaluator,
-        create_api_log_detector,
-        create_network_traffic_detector,
-        create_security_monitor
-    )
-    DETECTION_ENGINE_AVAILABLE = True
-except ImportError as e:
-    print(f"Warning: Detection engine import failed: {e}")
-    class UnifiedDetectionEngine:
-        def __init__(self, *args, **kwargs):
-            pass
-    class RealTimeSecurityMonitor:
-        def __init__(self, *args, **kwargs):
-            pass
-    class EnhancedTrafficSimulator:
-        def __init__(self, *args, **kwargs):
-            pass
-    class EnhancedPerformanceEvaluator:
-        def __init__(self, *args, **kwargs):
-            pass
-    def create_api_log_detector(*args, **kwargs):
-        return None
-    def create_network_traffic_detector(*args, **kwargs):
-        return None
-    def create_security_monitor(*args, **kwargs):
-        return None
-    DETECTION_ENGINE_AVAILABLE = False
+    # attack detector
+    'RealTimeAttackDetector': 'core.security.attack_detector',
+    'TrafficSimulator': 'core.security.attack_detector',
+    'PerformanceEvaluator': 'core.security.attack_detector',
+    'AlertManager': 'core.security.attack_detector',
+    'DetectionOrchestrator': 'core.security.attack_detector',
+    'create_detection_system': 'core.security.attack_detector',
+    'run_quick_simulation': 'core.security.attack_detector',
+    'evaluate_attack_detection': 'core.security.attack_detector',
 
-__all__ = [
-    # 데이터 로딩 (✅ 복원 완료)
-    'CICIDSDataLoader',
-    'check_cicids_data_availability',
-    'generate_cicids_sample_data',
-    'generate_enhanced_sample_data',
+    # detection engine (고도화)
+    'UnifiedDetectionEngine': 'core.security.detection_engine',
+    'RealTimeSecurityMonitor': 'core.security.detection_engine',
+    'EnhancedTrafficSimulator': 'core.security.detection_engine',
+    'EnhancedPerformanceEvaluator': 'core.security.detection_engine',
+    'create_api_log_detector': 'core.security.detection_engine',
+    'create_network_traffic_detector': 'core.security.detection_engine',
+    'create_security_monitor': 'core.security.detection_engine',
+}
 
-    # 모델 구축 (✅ 기존 유지)
-    'SecurityModelBuilder',
-    'AttackPatternAnalyzer',
-    'check_tensorflow_availability',
-    'install_tensorflow',
 
-    # 기본 공격 탐지 (호환성 유지)
-    'RealTimeAttackDetector',
-    'TrafficSimulator',          # 기본 버전
-    'PerformanceEvaluator',      # 기본 버전
-    'AlertManager',
-    'DetectionOrchestrator',
-    'create_detection_system',
-    'run_quick_simulation',
-    'evaluate_attack_detection',
-
-    # 🆕 통합 탐지 엔진 (고도화 버전 - 권장)
-    'UnifiedDetectionEngine',
-    'RealTimeSecurityMonitor',
-    'EnhancedTrafficSimulator',   # 고도화 버전
-    'EnhancedPerformanceEvaluator', # 고도화 버전
-    'create_api_log_detector',
-    'create_network_traffic_detector',
-    'create_security_monitor'
-]
+__all__ = list(_ATTR_MODULE_MAP.keys())
 
 __version__ = "1.0.0"
 __author__ = "Customer Segmentation Project"
-__description__ = "CICIDS2017 네트워크 이상 탐지 모듈 (통합 탐지 엔진 포함)"
+__description__ = "CICIDS2017 네트워크 이상 탐지 모듈 (지연 로딩 지원)"
+
+
+def _make_stub(name, exc):
+    """심볼 접근 시 import 실패하면 호출되는 스텁 함수/클래스 반환."""
+    def _stub(*args, **kwargs):
+        raise ImportError(f"심볼 '{name}'을(를) 로드할 수 없습니다: {exc}")
+    _stub.__name__ = name
+    return _stub
+
+
+def __getattr__(name: str):
+    """요청된 심볼을 실제 모듈에서 동적으로 로드해서 반환합니다.
+    실패 시 경고 후, 호출 시 ImportError를 발생시키는 스텁을 반환합니다.
+    """
+    if name not in _ATTR_MODULE_MAP:
+        raise AttributeError(f"module {__name__} has no attribute {name}")
+
+    module_path = _ATTR_MODULE_MAP[name]
+    try:
+        module = importlib.import_module(module_path)
+        attr = getattr(module, name)
+        # 캐싱: 다음 접근부터는 재import하지 않도록 globals에 저장
+        globals()[name] = attr
+        return attr
+    except Exception as e:
+        warnings.warn(f"Lazy import failed for {name} from {module_path}: {e}", ImportWarning)
+        stub = _make_stub(name, e)
+        globals()[name] = stub
+        return stub
+
+
+def __dir__():
+    return sorted(list(globals().keys()) + __all__)

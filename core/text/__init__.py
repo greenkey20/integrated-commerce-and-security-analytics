@@ -1,27 +1,23 @@
 """
-Core retail analysis module
+Text 패키지 초기화 - 지연 로딩 지원
 
-이 모듈은 온라인 리테일 데이터 분석의 핵심 로직을 담당합니다.
-상위 패키지 import 시 무거운 서브모듈이 자동으로 로드되지 않도록 지연 로딩을 사용합니다.
+이 파일은 `core.text`에서 제공하는 핵심 심볼만 노출합니다.
+심볼 접근 시점에 관련 모듈을 import 하도록 하여, 상위 패키지 import 시
+불필요한 무거운 의존성(예: TensorFlow)이 자동으로 로드되지 않도록 합니다.
 """
 
 import importlib
 import warnings
 
 _ATTR_MODULE_MAP = {
-    'RetailDataLoader': 'data.loaders.retail_loader',
-    'RetailDataProcessor': 'data.processors.retail_data_processor',
-    'RetailFeatureEngineer': 'data.processors.retail_feature_engineer',
-    'RetailModelTrainer': 'core.retail.model_trainer',
-    'RetailVisualizer': 'core.retail.visualizer',
-    'RetailAnalysisManager': 'core.retail.analysis_manager',
+    'TextAnalyticsModels': 'core.text.sentiment_models',
 }
 
 __all__ = list(_ATTR_MODULE_MAP.keys())
 
-__version__ = "2.0.0"
+__version__ = "1.0.0"
 __author__ = "Customer Segmentation Project"
-__description__ = "리팩토링된 온라인 리테일 분석 핵심 모듈 (지연 로딩 지원)"
+__description__ = "텍스트 분석 관련 모듈 (지연 로딩 지원)"
 
 
 def __getattr__(name: str):

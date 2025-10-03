@@ -3,16 +3,30 @@
 기존 패턴을 따르되 텍스트 특화 기능 추가
 """
 
-import tensorflow as tf
-from tensorflow import keras
-from tensorflow.keras import layers
-import numpy as np
-import streamlit as st
+# TensorFlow는 무거운 초기화가 발생하므로 필요 시에만 import하도록 지연 로딩합니다.
+# 최상위에서 import하지 않음으로써 다른 모듈들이 불필요하게 TensorFlow를 로드하지 않게 합니다.
+
 from config.settings import TextAnalyticsConfig
 
 
+def _import_tf():
+    """지연 로딩 헬퍼: TensorFlow, Keras, Layers를 가져옵니다.
+    실패 시 명확한 ImportError를 발생시켜 호출자에게 알립니다.
+    """
+    try:
+        import tensorflow as tf
+        from tensorflow import keras
+        from tensorflow.keras import layers
+        return tf, keras, layers
+    except Exception as e:
+        raise ImportError(
+            "TensorFlow를 로드할 수 없습니다. 텍스트 모델을 사용하려면 TensorFlow가 필요합니다: "
+            + str(e)
+        )
+
+
 class TextAnalyticsModels:
-    """텍스트 분석 전용 딥러닝 모델 클래스"""
+    """텍스트 분석 전용딥러닝 모델 클래스"""
 
     def __init__(self):
         self.sentiment_model = None
@@ -21,6 +35,9 @@ class TextAnalyticsModels:
 
     def create_sentiment_lstm(self, vocab_size=None, embedding_dim=None, lstm_units=None):
         """감정 분석용 LSTM 모델 생성"""
+
+        # TensorFlow/Keras 지연 로딩
+        tf, keras, layers = _import_tf()
 
         # 기본값 설정
         vocab_size = vocab_size or TextAnalyticsConfig.IMDB_VOCAB_SIZE
@@ -69,6 +86,9 @@ class TextAnalyticsModels:
     def create_text_classifier(self, num_classes, vocab_size=None):
         """다중 클래스 텍스트 분류 모델 생성"""
 
+        # TensorFlow/Keras 지연 로딩
+        _, keras, layers = _import_tf()
+
         vocab_size = vocab_size or TextAnalyticsConfig.IMDB_VOCAB_SIZE
 
         try:
@@ -100,6 +120,9 @@ class TextAnalyticsModels:
     def train_with_progress(self, model, X_train, y_train, X_val, y_val,
                             epochs=None, progress_bar=None, status_text=None):
         """진행상황을 표시하며 모델 훈련"""
+
+        # TensorFlow/Keras 지연 로딩 (콜백에 접근하기 위해 필요)
+        _, keras, _ = _import_tf()
 
         epochs = epochs or TextAnalyticsConfig.EPOCHS
 
