@@ -608,7 +608,8 @@ def route_to_hierarchical_page(retail_step, customer_step, security_step, curren
             focus_info = {
                 'retail': f"💰 Retail: {retail_step}",
                 'customer': f"👥 Customer: {customer_step}",
-                'security': f"🔒 Security: {security_step}"
+                'security': f"🔒 Security: {security_step}",
+                'text': "📝 텍스트 감정 분석"
             }
             st.info(f"{focus_info[current_focus]}")
 
@@ -1002,7 +1003,8 @@ def main():
                 focus_info = {
                     'retail': f"💰 Retail: {retail_step}",
                     'customer': f"👥 Customer: {customer_step}", 
-                    'security': f"🔒 Security: {security_step}"
+                    'security': f"🔒 Security: {security_step}",
+                    'text': "📝 텍스트 감정 분석"
                 }
                 st.info(f"📍 **현재 포커스**: {focus_info[current_focus]}")
             else:
