@@ -265,24 +265,26 @@ flake8 core/ web/ utils/
 black core/ web/ utils/
 ```
 
-### 모델 훈련 & 실험
-```bash
-# Jupyter Lab 실행 (실험용)
-jupyter lab notebooks/
-
-# 특정 실험 실행
-python -m notebooks.experiments.retail_regression_comparison
-python -m notebooks.experiments.deep_learning_architectures
+#### 개발 노트 (통합 요약 — 2025-10-03)
+- 최근 작업 요약: 텍스트 분석 모듈의 도메인 독립성 검증 스모크 테스트를 추가하고 테스트 구조(unit/functional)를 정리했습니다. FastAPI 엔트리포인트(`api_main.py`)를 구현하여 `startup` 이벤트에서 모델과 토크나이저를 초기화하도록 구성했고, 예측 실패 시 규칙 기반 폴백을 적용했습니다.
+- 주요 파일(참고): `api_main.py`, `test/unit/test_api_unit.py`, `test/functional/test_api_integration.py`, `test/functional/test_text_import.py` (참조: `core/text/sentiment_models.py`, `main_app.py`, `web/pages/*` — 수정 금지)
+- 배운 점 요약: 지연 로딩(lazy import)으로 불필요한 무거운 라이브러리 로드를 피할 수 있으며, FastAPI `startup` 이벤트는 ML 자원을 한 번만 초기화하는 안전한 패턴입니다. CI에서는 단위/통합 테스트 분리 실행 설계가 유리합니다.
+- 다음 권장 작업(우선순위): 1) pytest 스타일로 테스트 리팩토링 및 케이스 추가 2) GitHub Actions 워크플로 실제 적용(단위/통합 분리) 3) `api_main.py`의 모델 로드에 에러/타임아웃/리트라이 정책 추가 4) 엔드포인트 로깅·모니터링 개선
+- 제안 커밋 메시지:
 ```
-
-### 데이터 처리
+feat(api): load Keras sentiment model at startup and use for /analyze inference,\
+fallback to rule-based if unavailable
+```
+- 빠른 실행/검증 힌트:
 ```bash
-# 대용량 데이터 전처리
-python scripts/preprocess_retail_data.py
-python scripts/preprocess_security_data.py
-
-# 특성 공학 실행
-python scripts/generate_features.py --mode all
+# 가상환경 활성화(예시)
+source .venv/bin/activate
+# 단위/기능 테스트 (개별)
+python -m pytest test/unit/test_api_unit.py
+python -m pytest test/functional/test_api_integration.py
+python -m pytest test/functional/test_text_import.py
+# FastAPI 개발 서버
+uvicorn api_main:app --reload --port 8000
 ```
 
 ---
@@ -405,13 +407,9 @@ docker run -p 8501:8501 commerce-analytics
 
 ---
 
-<div align="center">
-
 **🌟 이 프로젝트가 도움이 되었다면 Star를 눌러주세요! 🌟**
 
-[![GitHub stars](https://img.shields.io/github/stars/greenkey20/integrated-commerce-and-security-analytics.svg?style=social&label=Star)](https://github.com/greenkey20/integrated-commerce-and-security-analytics/stargazers)
-[![GitHub forks](https://img.shields.io/github/forks/greenkey20/integrated-commerce-and-security-analytics.svg?style=social&label=Fork)](https://github.com/greenkey20/integrated-commerce-and-security-analytics/network/members)
+- [![GitHub stars](https://img.shields.io/github/stars/greenkey20/integrated-commerce-and-security-analytics.svg?style=social&label=Star)](https://github.com/greenkey20/integrated-commerce-and-security-analytics/stargazers)
+- [![GitHub forks](https://img.shields.io/github/forks/greenkey20/integrated-commerce-and-security-analytics.svg?style=social&label=Fork)](https://github.com/greenkey20/integrated-commerce-and-security-analytics/network/members)
 
 **💚 Green Intelligence for Sustainable Business Growth 💚**
-
-</div>
