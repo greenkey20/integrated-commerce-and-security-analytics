@@ -258,7 +258,7 @@ notebooks/experiments/
 pip install -r requirements_dev.txt
 
 # 테스트 실행
-python -m pytest test/
+python -m pytest tests/
 
 # 코드 품질 검사
 flake8 core/ web/ utils/
@@ -280,9 +280,9 @@ fallback to rule-based if unavailable
 # 가상환경 활성화(예시)
 source .venv/bin/activate
 # 단위/기능 테스트 (개별)
-python -m pytest test/unit/test_api_unit.py
-python -m pytest test/functional/test_api_integration.py
-python -m pytest test/functional/test_text_import.py
+python -m pytest tests/unit/test_api_unit.py
+python -m pytest tests/functional/test_api_integration.py
+python -m pytest tests/functional/test_text_import.py
 # FastAPI 개발 서버
 uvicorn api_main:app --reload --port 8000
 ```
