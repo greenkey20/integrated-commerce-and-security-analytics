@@ -11,29 +11,46 @@ on:
 jobs:
   test:
     runs-on: ubuntu-latest  # Ubuntu 서버에서 실행
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
 
     steps:
       # 1단계: 코드 가져오기
       - name: Checkout code
         uses: actions/checkout@v3
 
-      # 1.5: Ensure docker is available (hosted runners provide docker and the v2 compose plugin as `docker compose`)
-      - name: Print docker version (diagnostic)
+      # Set up Python on the runner (use 3.10 because repo contains py310 compiled files)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # Cache pip packages
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Install minimal test dependencies (pytest + pytest-cov). Installing full requirements may be slow or fail on runners.
+      - name: Install test deps
         run: |
-          docker --version || true
-          docker compose version || true
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
 
-      # 2단계: Docker 빌드 (use `docker compose` which is available on hosted runners)
-      - name: Build Docker image
-        run: docker compose build
-
-      # 3단계: 테스트 실행
-      - name: Run tests
-        run: docker compose run test || exit 0
-
-      # Ensure test-results dir exists so artifact upload doesn't fail
-      - name: Ensure test-results dir
-        run: mkdir -p test-results
+      # Run tests on the runner and capture exit code to outputs so we can upload artifacts regardless and then fail the job if needed
+      - name: Run pytest
+        id: run_tests
+        run: |
+          mkdir -p test-results
+          pytest -q --junitxml=test-results/junit.xml --cov=core --cov-report=html
+          rc=$?
+          echo "pytest_rc=$rc" >> $GITHUB_OUTPUT
+          # Always exit 0 so the step doesn't stop the job; we'll fail explicitly later if rc != 0
+          exit 0
+        shell: bash
 
       # 4단계: 결과 업로드 (실패 시 로그 확인)
       - name: Upload test results
@@ -43,26 +60,21 @@ jobs:
           name: test-results
           path: test-results/
 
-      - name: Run tests with coverage
-        run: |
-          docker compose run test pytest --cov=core --cov-report=html || true
-
       - name: Upload coverage to Codecov
         uses: codecov/codecov-action@v4
 
-# TODO
-#      - name: Deploy to production
-#        if: github.ref == 'refs/heads/main'
-#        run: |
-#          # Docker Hub에 이미지 푸시
-#          docker tag myapp:latest myaccount/myapp:latest
-#          docker push myaccount/myapp:latest
-
       - name: Notify on failure
-        if: failure() && (secrets.SLACK_WEBHOOK_URL != '')
+        if: steps.run_tests.outputs.pytest_rc != '0' && (env.SLACK_WEBHOOK_URL != '')
         uses: 8398a7/action-slack@v3
         env:
           SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
         with:
           status: ${{ job.status }}
           text: 'Tests failed! Check logs.'
+
+      # If tests failed, fail the job now (after artifacts were uploaded)
+      - name: Fail job if tests failed
+        if: steps.run_tests.outputs.pytest_rc != '0'
+        run: |
+          echo "Tests failed with exit code ${{ steps.run_tests.outputs.pytest_rc }}"
+          exit 1
