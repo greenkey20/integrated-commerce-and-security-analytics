@@ -14,6 +14,7 @@ import logging
 # Domain routers import
 from api.domains.text_domain import text_router, initialize_text_module
 from api.domains.customer_domain import customer_router, initialize_customer_module
+from api.domains.retail_domain import retail_router, initialize_retail_module
 
 # ==================== FastAPI App Setup ====================
 
@@ -41,7 +42,7 @@ logging.basicConfig(level=logging.INFO)
 
 app.include_router(text_router)
 app.include_router(customer_router)
-# TODO: Add retail_router
+app.include_router(retail_router)
 # TODO: Add security_router
 
 
@@ -58,7 +59,9 @@ async def startup():
     # Customer Analytics 초기화
     await initialize_customer_module()
     
-    # TODO: Retail Analytics 초기화
+    # Retail Analytics 초기화
+    await initialize_retail_module()
+
     # TODO: Security Analytics 초기화
     
     logger.info("✅ All modules initialized successfully!")
