@@ -5,3 +5,4 @@ Traceback (most recent call last):
   File "/Users/greenpianorabbit/Documents/Development/integrated-commerce-and-security-analytics/./api/domains/security_domain.py", line 176, in detect_anomalies
     raise RuntimeError("Security detector missing detect interface")
 RuntimeError: Security detector missing detect interface
+2025-10-07 10:25:43,337 - api.domains.security_domain - INFO - ✅ Security UnifiedDetectionEngine loaded successfully.
