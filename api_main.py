@@ -15,6 +15,7 @@ import logging
 from api.domains.text_domain import text_router, initialize_text_module
 from api.domains.customer_domain import customer_router, initialize_customer_module
 from api.domains.retail_domain import retail_router, initialize_retail_module
+from api.domains.security_domain import security_router, initialize_security_module
 
 # ==================== FastAPI App Setup ====================
 
@@ -43,7 +44,7 @@ logging.basicConfig(level=logging.INFO)
 app.include_router(text_router)
 app.include_router(customer_router)
 app.include_router(retail_router)
-# TODO: Add security_router
+app.include_router(security_router)
 
 
 # ==================== Startup Event ====================
@@ -62,8 +63,9 @@ async def startup():
     # Retail Analytics 초기화
     await initialize_retail_module()
 
-    # TODO: Security Analytics 초기화
-    
+    # Security Analytics 초기화
+    await initialize_security_module()
+
     logger.info("✅ All modules initialized successfully!")
 
 
@@ -79,8 +81,8 @@ async def root():
         "domains": {
             "text": "Text Analytics (Sentiment Analysis)",
             "customer": "Customer Segmentation",
-            "retail": "Retail Analytics (Coming Soon)",
-            "security": "Security Analytics (Coming Soon)"
+            "retail": "Retail Analytics",
+            "security": "Security Analytics"
         }
     }
 

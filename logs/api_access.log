@@ -1,0 +1,7 @@
+2025-10-07 11:45:28,811 - api.domains.security_domain - INFO - ✅ Security UnifiedDetectionEngine loaded successfully.
+2025-10-07 17:17:57,584 - api.domains.security_domain - INFO - ✅ Security UnifiedDetectionEngine loaded successfully.
+2025-10-07 17:19:02,118 - api.domains.security_domain - ERROR - Anomaly detection failed: Security detector missing detect interface
+Traceback (most recent call last):
+  File "/Users/greenpianorabbit/Documents/Development/integrated-commerce-and-security-analytics/./api/domains/security_domain.py", line 176, in detect_anomalies
+    raise RuntimeError("Security detector missing detect interface")
+RuntimeError: Security detector missing detect interface
