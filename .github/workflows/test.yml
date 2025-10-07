@@ -28,7 +28,33 @@ jobs:
       # 4단계: 결과 업로드 (실패 시 로그 확인)
       - name: Upload test results
         if: always()  # 성공/실패 상관없이 실행
-        uses: actions/upload-artifact@v3
+        uses: actions/upload-artifact@v4
         with:
           name: test-results
           path: test-results/
+
+      - name: Run tests with coverage
+        run: |
+          docker-compose run test pytest --cov=core --cov-report=html
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+
+# TODO
+#      - name: Deploy to production
+#        if: github.ref == 'refs/heads/main'
+#        run: |
+#          # Docker Hub에 이미지 푸시
+#          docker tag myapp:latest myaccount/myapp:latest
+#          docker push myaccount/myapp:latest
+
+      - name: Notify on failure
+        if: failure()
+        uses: 8398a7/action-slack@v4
+        with:
+          status: ${{ job.status }}
+          text: 'Tests failed! Check logs.'
+
+
+
+
