@@ -1,4 +1,4 @@
-# 파일명: test/integration/improved_memory_test.py
+# 파일명: tests/integration/improved_memory_test.py
 
 import sys
 import os

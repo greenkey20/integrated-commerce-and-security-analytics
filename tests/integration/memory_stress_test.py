@@ -1,4 +1,4 @@
-# 파일명: test/integration/memory_stress_test.py
+# 파일명: tests/integration/memory_stress_test.py
 
 import sys
 import os

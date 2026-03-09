@@ -1,0 +1,50 @@
+# 🐳 Docker Compose for Integrated Commerce & Security Analytics
+# Supports both development and production environments
+
+version: '3.8'
+
+services:
+  api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: analytics-api
+    ports:
+      - "8000:8000"
+    volumes:
+      # Mount source code for hot-reload in development
+      - .:/app
+      # Exclude virtual environments and cache
+      - /app/venv
+      - /app/venv_langchain
+      - /app/__pycache__
+    environment:
+      - PYTHONUNBUFFERED=1
+      - PYTHONDONTWRITEBYTECODE=1
+    command: uvicorn api_main:app --host 0.0.0.0 --port 8000 --reload
+    restart: unless-stopped
+    healthcheck:
+      test: ["CMD", "python", "-c", "import urllib.request; urllib.request.urlopen('http://localhost:8000/health')"]
+      interval: 30s
+      timeout: 10s
+      retries: 3
+      start_period: 40s
+
+  # Optional: Add Streamlit service (for UI)
+  streamlit:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: analytics-streamlit
+    ports:
+      - "8501:8501"
+    volumes:
+      - .:/app
+      - /app/venv
+      - /app/venv_langchain
+    environment:
+      - PYTHONUNBUFFERED=1
+    command: streamlit run main_app.py --server.port=8501 --server.address=0.0.0.0
+    restart: unless-stopped
+    depends_on:
+      - api

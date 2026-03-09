@@ -613,7 +613,7 @@ mv data/loaders/security_loader.py docs/backup/security/security_loader_backup_o
 #### **D. 테스트 파일들**
 6. **`test/` 폴더 내 모든 보안 관련 테스트**:
    ```bash
-   find test/ -name "*.py" -exec grep -l "data_loader\|CICIDSDataLoader" {} \;
+   find tests/ -name "*.py" -exec grep -l "data_loader\|CICIDSDataLoader" {} \;
    ```
 
 7. **특정 테스트 파일들** (발견되는 경우):

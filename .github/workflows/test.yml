@@ -1,0 +1,80 @@
+name: API Tests  # 워크플로우 이름 (GitHub UI에 표시됨)
+
+# 언제 실행할까?
+on:
+  push:  # 어떤 브랜치에든 push하면
+    branches: [ main, develop ]
+  pull_request:  # PR 만들면
+    branches: [ main ]
+
+# 실제 작업 정의
+jobs:
+  test:
+    runs-on: ubuntu-latest  # Ubuntu 서버에서 실행
+    env:
+      SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+
+    steps:
+      # 1단계: 코드 가져오기
+      - name: Checkout code
+        uses: actions/checkout@v3
+
+      # Set up Python on the runner (use 3.10 because repo contains py310 compiled files)
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.10'
+
+      # Cache pip packages
+      - name: Cache pip
+        uses: actions/cache@v4
+        with:
+          path: ~/.cache/pip
+          key: ${{ runner.os }}-pip-${{ hashFiles('**/requirements*.txt') }}
+          restore-keys: |
+            ${{ runner.os }}-pip-
+
+      # Install minimal test dependencies (pytest + pytest-cov). Installing full requirements may be slow or fail on runners.
+      - name: Install test deps
+        run: |
+          python -m pip install --upgrade pip
+          pip install pytest pytest-cov
+
+      # Run tests on the runner and capture exit code to outputs so we can upload artifacts regardless and then fail the job if needed
+      - name: Run pytest
+        id: run_tests
+        run: |
+          mkdir -p test-results
+          pytest -q --junitxml=test-results/junit.xml --cov=core --cov-report=html
+          rc=$?
+          echo "pytest_rc=$rc" >> $GITHUB_OUTPUT
+          # Always exit 0 so the step doesn't stop the job; we'll fail explicitly later if rc != 0
+          exit 0
+        shell: bash
+
+      # 4단계: 결과 업로드 (실패 시 로그 확인)
+      - name: Upload test results
+        if: always()  # 성공/실패 상관없이 실행
+        uses: actions/upload-artifact@v4
+        with:
+          name: test-results
+          path: test-results/
+
+      - name: Upload coverage to Codecov
+        uses: codecov/codecov-action@v4
+
+      - name: Notify on failure
+        if: steps.run_tests.outputs.pytest_rc != '0' && (env.SLACK_WEBHOOK_URL != '')
+        uses: 8398a7/action-slack@v3
+        env:
+          SLACK_WEBHOOK_URL: ${{ secrets.SLACK_WEBHOOK_URL }}
+        with:
+          status: ${{ job.status }}
+          text: 'Tests failed! Check logs.'
+
+      # If tests failed, fail the job now (after artifacts were uploaded)
+      - name: Fail job if tests failed
+        if: steps.run_tests.outputs.pytest_rc != '0'
+        run: |
+          echo "Tests failed with exit code ${{ steps.run_tests.outputs.pytest_rc }}"
+          exit 1
