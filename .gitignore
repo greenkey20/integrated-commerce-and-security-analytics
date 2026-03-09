@@ -39,6 +39,7 @@ ENV/
 # IDE-specific files
 .idea/
 .vscode/
+.claude/
 *.iml
 *.iws
 
@@ -100,4 +101,4 @@ models/saved/
 # data/*.csv
 # data/*.txt
 # data/*.json
-# data/cicids2017/
+data/cicids2017/
